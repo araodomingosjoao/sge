@@ -46,13 +46,13 @@ class User extends Authenticatable
         ];
     }
 
-    public function posts()
+    public function school()
     {
-        return $this->hasMany(Post::class);
+        return $this->belongsTo(School::class, 'school_id');
     }
 
-    public function comments()
+    public function student()
     {
-        return $this->hasMany(Comment::class);
+        return $this->hasOne(Student::class, 'user_id');
     }
 }
