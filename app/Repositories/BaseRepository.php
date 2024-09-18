@@ -6,12 +6,13 @@ use App\Events\AfterCreate;
 use App\Events\AfterUpdate;
 use App\Events\BeforeCreate;
 use App\Events\BeforeUpdate;
+use App\Repositories\Interfaces\RepositoryInterface;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class BaseRepository
+class BaseRepository implements RepositoryInterface
 {
     protected $model;
     protected $relationships = [];
