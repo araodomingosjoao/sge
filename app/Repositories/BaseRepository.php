@@ -38,7 +38,8 @@ class BaseRepository implements RepositoryInterface
     public function create(array $data): Model
     {
         try {
-            event(new BeforeCreate($data, $this->model));
+            $data = event(new BeforeCreate($data, $this->model));
+            $data = $data[count($data)-1];
             $model = $this->model->create($data);
             event(new AfterCreate($model));
             return $model;
@@ -50,10 +51,10 @@ class BaseRepository implements RepositoryInterface
     /**
      * Find a record by ID.
      *
-     * @param int $id
+     * @param int|string $id
      * @return Model|null
      */
-    public function find(int $id): ?Model
+    public function find(int|string $id): ?Model
     {
         return $this->model->with($this->relationships)->find($id);
     }
@@ -61,11 +62,11 @@ class BaseRepository implements RepositoryInterface
     /**
      * Updates a record by ID.
      *
-     * @param int $id
+     * @param int|string $id
      * @param array $data
      * @return Model|bool
      */
-    public function update(int $id, array $data): Model|bool
+    public function update(int|string $id, array $data): Model|bool
     {
         $record = $this->model->find($id);
         if ($record) {
@@ -86,10 +87,10 @@ class BaseRepository implements RepositoryInterface
     /**
      * Deletes a record by ID.
      *
-     * @param int $id
+     * @param int|string $id
      * @return bool
      */
-    public function delete(int $id): bool
+    public function delete(int|string $id): bool
     {
         $record = $this->model->find($id);
         if ($record) {
