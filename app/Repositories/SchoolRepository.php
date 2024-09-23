@@ -9,5 +9,6 @@ class SchoolRepository extends BaseRepository
     public function __construct(School $user)
     {
         parent::__construct($user);
+        $this->relationships = ['typeEducation'];
     }
 }
