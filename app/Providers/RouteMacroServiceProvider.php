@@ -25,7 +25,7 @@ class RouteMacroServiceProvider extends ServiceProvider
                 Route::post('/', [$controller, 'create']);
                 Route::get('/{id}', [$controller, 'read']);
                 Route::put('/{id}', [$controller, 'update']);
-                Route::delete('/{id}', [$controller, 'destroy']);
+                Route::delete('/{id}', [$controller, 'delete']);
                 Route::get('/', [$controller, 'index']);
             });
         });
