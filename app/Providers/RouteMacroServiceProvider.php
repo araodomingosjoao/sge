@@ -25,7 +25,7 @@ class RouteMacroServiceProvider extends ServiceProvider
                 Route::post('/', [$controller, 'create'])->middleware($specificMiddlewares['create'] ?? []);
                 Route::get('/', [$controller, 'index'])->middleware($specificMiddlewares['index'] ?? []);
                 Route::get('/{id}', [$controller, 'read'])->middleware($specificMiddlewares['read'] ?? []);
-                Route::put('/{id}', [$controller, 'update'])->middleware($specificMiddlewares['update'] ?? []);
+                Route::post('/{id}', [$controller, 'update'])->middleware($specificMiddlewares['update'] ?? []);
                 Route::delete('/{id}', [$controller, 'delete'])->middleware($specificMiddlewares['delete'] ?? []);
             });
         });
