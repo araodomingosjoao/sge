@@ -13,6 +13,9 @@ Route::post('/school/register', [SchoolRegistrationController::class, 'register'
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/user/profile', [AuthController::class, 'profile']);
     Route::apiCrud('user', UserController::class);
-    Route::apiCrud('school', SchoolController::class);
+    Route::apiCrud('school', SchoolController::class, null, [
+        'create' => 'role:admin_school',
+        'delete' => 'role:admin_school' 
+    ]);
 });
 
