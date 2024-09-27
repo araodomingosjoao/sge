@@ -44,7 +44,7 @@ class School extends Model
     public static function getFileFields(): array
     {
         return [
-                'logo' => [
+                'logo_path' => [
                     'folder' => 'logos',
                     'disk' => 'public',
                     'fileName' => fn ($file) => Str::random(40) . '.' . $file->getClientOriginalExtension(),

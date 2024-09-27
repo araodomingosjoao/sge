@@ -27,7 +27,7 @@ trait CrudTrait
     {
         $record = $this->repository->find($id);
         if ($record) {
-            return ApiResponse::success(new $this->resource($record));
+            return ApiResponse::success($this->resourceDetails ? new $this->resourceDetails($record) : new $this->resource($record));
         }
         return ApiResponse::error('Record not found', 404);
     }

@@ -18,4 +18,3 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         'delete' => 'role:admin_school' 
     ]);
 });
-
