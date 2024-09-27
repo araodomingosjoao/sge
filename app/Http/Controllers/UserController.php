@@ -14,6 +14,7 @@ class UserController extends Controller
     protected $storeValidationRules = [
         'name' => 'required|string|max:255',
         'email' => 'required|email|unique:users,email',
+        'phone_number' => 'required|string|unique:users,phone_number',
         'password' => [
             'required',
             'string',
@@ -27,6 +28,7 @@ class UserController extends Controller
     protected $updateValidationRules = [
         'name' => 'sometimes|required|string|max:255',
         'email' => 'sometimes|required|email',
+        'phone_number' => 'sometimes|string|unique:users,phone_number',
         'password' => [
             'sometimes',
             'string',
@@ -39,7 +41,8 @@ class UserController extends Controller
     ];
 
     protected $uniqueFields = [
-        'email' => 'users'
+        'email' => 'users',
+        'phone_number' => 'users'
     ];
 
     protected $resource = UserResource::class;

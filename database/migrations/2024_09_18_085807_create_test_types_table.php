@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('test_types', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();
             $table->string('name');
             $table->text('description')->nullable();
             $table->timestamps();

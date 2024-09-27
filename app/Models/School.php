@@ -14,9 +14,19 @@ class School extends Model
 
     protected $fillable = [
         'type_education_id',
-        'name',
-        'logo',
-        'address'
+        'school_name',
+        'logo_path',
+        'address',
+        'city',
+        'state',
+        'country',
+        'postal_code',
+        'phone',
+        'email',
+        'website',
+        'founded_year',
+        'registration_number',
+        'status',
     ];
 
     protected $casts = [

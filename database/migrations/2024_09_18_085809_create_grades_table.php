@@ -16,7 +16,7 @@ return new class extends Migration
             $table->uuid('student_id');
             $table->uuid('discipline_id');
             $table->uuid('trimester_id');
-            $table->uuid('test_type_id');
+            $table->unsignedBigInteger('test_type_id');
             $table->decimal('grade', 5, 2);
             $table->timestamps();
             $table->softDeletes();
