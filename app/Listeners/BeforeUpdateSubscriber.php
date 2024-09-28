@@ -31,10 +31,11 @@ class BeforeUpdateSubscriber
 
         foreach ($fileFields as $field => $options) {
             if (isset($data[$field])) {
+                $this->deleteOldFile($model, $field, $options);
                 $event->data[$field] = $this->processField($data[$field], $options);
             }
         }
-        Log::info($data);
+
         return $data;
     }
 
@@ -105,6 +106,21 @@ class BeforeUpdateSubscriber
         }
 
         return $uploadedFiles;
+    }
+
+    private function deleteOldFile($model, $field, $options): void
+    {
+        $disk = $options['disk'] ?? 'public';
+        $oldFilePath = $model->getOriginal($field);
+
+        if ($oldFilePath && Storage::disk($disk)->exists($oldFilePath)) {
+            try {
+                Storage::disk($disk)->delete($oldFilePath);
+                Log::info("Arquivo antigo removido: " . $oldFilePath);
+            } catch (\Exception $e) {
+                Log::error("Erro ao remover o arquivo antigo: {$e->getMessage()}");
+            }
+        }
     }
 
     public function hashPassword(BeforeUpdate $event)

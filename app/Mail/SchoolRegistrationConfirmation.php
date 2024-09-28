@@ -9,7 +9,7 @@ use Illuminate\Queue\SerializesModels;
 use App\Models\School;
 use App\Models\User;
 
-class SchoolRegistrationConfirmation extends Mailable
+class SchoolRegistrationConfirmation extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
