@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\SchoolRegistrationConfirmation;
 use App\Models\Role;
+use Illuminate\Support\Facades\Log;
 
 class SchoolRegistrationController extends Controller
 {
@@ -38,9 +39,10 @@ class SchoolRegistrationController extends Controller
             // Mail::to($user->email)->send(new SchoolRegistrationConfirmation($school, $user));
             return ApiResponse::success([], 'School and admin user registered successfully', 201);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
-            return response()->json(['error' => 'Registration failed. Please try again.', $e->getMessage()], 500);
+            Log::error($e); 
+            return response()->json(['error' => 'Registration failed. Please try again.'], 500);
         }
     }
 }
