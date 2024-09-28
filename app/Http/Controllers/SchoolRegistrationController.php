@@ -3,11 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ApiResponse;
+use App\Http\Requests\SchoolRegistrationRequest;
 use App\Models\School;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\SchoolRegistrationConfirmation;
@@ -15,34 +14,12 @@ use App\Models\Role;
 
 class SchoolRegistrationController extends Controller
 {
-    public function register(Request $request)
+    public function register(SchoolRegistrationRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'type_education_id' => 'required|numeric|exists:type_educations,id',
-            'school_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'password' => 'required|string|min:8',
-            'phone' => 'required|string|unique:users,phone|max:20',
-            'address' => 'required|string|max:255',
-            'city' => 'nullable|string|max:100',
-            'state' => 'nullable|string|max:100',
-            'country' => 'nullable|string|max:100',
-            'postal_code' => 'nullable|string|max:20',
-            'website' => 'nullable|url|max:255',
-            'founded_year' => 'nullable|numeric|min:1800',
-            'registration_number' => 'nullable|string|max:100',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
         DB::beginTransaction();
 
         try {
-            $school = School::create($validator->validate());
+            $school = School::create($request->validationData());
 
             $user = User::create([
                 'school_id' => $school->id,
