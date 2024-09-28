@@ -15,8 +15,13 @@ class AuthController extends Controller
     {
         $user = User::where('email', $request->email)->first();
 
-        if ($user && $user->status === UserStatus::INACTIVE) {
-            return response()->json(['message' => 'User Inative'], 401);
+        if (!$user || in_array($user->status, [
+            UserStatus::INACTIVE,
+            UserStatus::BLOCKED,
+            UserStatus::SUSPENDED,
+            UserStatus::PENDENT
+        ])) {
+            return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
         if (!$user || !Hash::check($request->password, $user->password)) {
