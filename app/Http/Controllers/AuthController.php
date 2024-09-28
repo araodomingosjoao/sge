@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\UserStatus;
+use App\Http\Requests\LoginRequest;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -10,13 +11,8 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string',
-        ]);
-
         $user = User::where('email', $request->email)->first();
 
         if ($user && $user->status === UserStatus::INACTIVE) {
