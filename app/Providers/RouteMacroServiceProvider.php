@@ -20,13 +20,13 @@ class RouteMacroServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Route::macro('apiCrud', function ($name, $controller) {
-            Route::prefix($name)->group(function () use ($controller) {
-                Route::post('/', [$controller, 'create']);
-                Route::get('/{id}', [$controller, 'read']);
-                Route::put('/{id}', [$controller, 'update']);
-                Route::delete('/{id}', [$controller, 'delete']);
-                Route::get('/', [$controller, 'index']);
+        Route::macro('apiCrud', function ($name, $controller, $globalMiddleware = [], $specificMiddlewares = []) {
+            Route::middleware(!empty($globalMiddleware) ? $globalMiddleware : [])->prefix($name)->group(function () use ($controller, $specificMiddlewares) {
+                Route::post('/', [$controller, 'create'])->middleware($specificMiddlewares['create'] ?? []);
+                Route::get('/', [$controller, 'index'])->middleware($specificMiddlewares['index'] ?? []);
+                Route::get('/{id}', [$controller, 'read'])->middleware($specificMiddlewares['read'] ?? []);
+                Route::put('/{id}', [$controller, 'update'])->middleware($specificMiddlewares['update'] ?? []);
+                Route::delete('/{id}', [$controller, 'delete'])->middleware($specificMiddlewares['delete'] ?? []);
             });
         });
     }

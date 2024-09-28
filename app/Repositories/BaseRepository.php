@@ -71,7 +71,8 @@ class BaseRepository implements RepositoryInterface
         $record = $this->model->find($id);
         if ($record) {
             try {
-                event(new BeforeUpdate($data, $record));
+                $data = event(new BeforeUpdate($data, $record));
+                $data = $data[count($data)-1];
                 $updated = $record->update($data);
                 if ($updated) {
                     event(new AfterUpdate($record));

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\School;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -17,9 +17,9 @@ class SchoolResource extends JsonResource
         return [
             'id' => $this->id,
             'type_education_id' => $this->type_education_id,
-            'name' => $this->name,
-            'logo' => $this->logo,
-            'address' => $this->address,
+            'school_name' => $this->school_name,
+            'logo_path' => $this->logo_path,
+            'status' => $this->status,
         ];
     }
 }

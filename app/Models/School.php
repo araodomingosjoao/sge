@@ -14,9 +14,19 @@ class School extends Model
 
     protected $fillable = [
         'type_education_id',
-        'name',
-        'logo',
-        'address'
+        'school_name',
+        'logo_path',
+        'address',
+        'city',
+        'state',
+        'country',
+        'postal_code',
+        'phone',
+        'email',
+        'website',
+        'founded_year',
+        'registration_number',
+        'status',
     ];
 
     protected $casts = [
@@ -34,7 +44,7 @@ class School extends Model
     public static function getFileFields(): array
     {
         return [
-                'logo' => [
+                'logo_path' => [
                     'folder' => 'logos',
                     'disk' => 'public',
                     'fileName' => fn ($file) => Str::random(40) . '.' . $file->getClientOriginalExtension(),
