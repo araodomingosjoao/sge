@@ -7,29 +7,31 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Discipline extends Model
+class Teacher extends Model
 {
     use HasFactory, SoftDeletes, HasUuids;
 
-    protected $fillable = ['name'];
+    protected $fillable = ['user_id', 'address', 'birth_date'];
 
     protected $casts = [
         'id' => 'string',
+        'user_id' => 'string',
+        'birth_date' => 'date',
     ];
 
-    public static function getFileFields(): array
+    public function user()
     {
-        return [];
+        return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function courses()
+    public function photo()
     {
-        return $this->belongsToMany(Course::class, 'course_disciplines');
+        return $this->morphOne(Photo::class, 'imageable');
     }
 
-    public function teachers()
+    public function disciplines()
     {
-        return $this->belongsToMany(Teacher::class, 'teacher_discipline_class')
+        return $this->belongsToMany(Discipline::class, 'teacher_discipline_class')
                     ->withPivot('class_id')
                     ->withTimestamps();
     }
@@ -37,7 +39,7 @@ class Discipline extends Model
     public function classes()
     {
         return $this->belongsToMany(SchoolClass::class, 'teacher_discipline_class')
-                    ->withPivot('teacher_id')
+                    ->withPivot('discipline_id')
                     ->withTimestamps();
     }
 }

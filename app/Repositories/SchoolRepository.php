@@ -6,9 +6,9 @@ use App\Models\School;
 
 class SchoolRepository extends BaseRepository
 {
-    public function __construct(School $user)
+    public function __construct(School $school)
     {
-        parent::__construct($user);
+        parent::__construct($school);
         $this->relationships = ['typeEducation'];
     }
 }

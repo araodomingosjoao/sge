@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -53,6 +54,17 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public static function getFileFields(): array
+    {
+        return [
+                'profile_picture_path' => [
+                    'folder' => 'teachers',
+                    'disk' => 'public',
+                    'fileName' => fn ($file) => Str::random(40) . '.' . $file->getClientOriginalExtension(),
+                ]
+            ];
     }
 
     public function school()

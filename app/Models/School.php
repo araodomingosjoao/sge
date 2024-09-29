@@ -34,13 +34,6 @@ class School extends Model
         'type_education_id' => 'string',
     ];
 
-    protected $fileFields;
-
-    /**
-     * Get the file fields for the model.
-     *
-     * @return array
-     */
     public static function getFileFields(): array
     {
         return [

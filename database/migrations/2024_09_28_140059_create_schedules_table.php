@@ -11,13 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('levels', function (Blueprint $table) {
+        Schema::create('schedules', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignId('type_education_id')->constrained('type_educations');
-            $table->string('name');
-            $table->integer('year')->unique();
+            $table->foreignUuid('teacher_discipline_class_id')->constrained('teacher_discipline_class');
+            $table->string('day_of_week');
+            $table->time('start_time');
+            $table->time('end_time');
+            $table->string('classroom')->nullable();
+            $table->date('specific_date')->nullable();
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
@@ -26,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('levels');
+        Schema::dropIfExists('schedules');
     }
 };
