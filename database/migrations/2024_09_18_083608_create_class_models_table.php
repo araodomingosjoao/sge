@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('classes', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('course_id');
+            $table->uuid('course_id')->nullable();
             $table->uuid('level_id');
             $table->string('name');
             $table->timestamps();

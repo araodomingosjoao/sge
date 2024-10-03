@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Level extends Model
+class Level extends BaseModel
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasUuids;
 
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'type_education_id', 'year'];
 
     protected $casts = [
         'id' => 'string',
@@ -18,6 +19,11 @@ class Level extends Model
 
     public function classes()
     {
-        return $this->hasMany(ClassModel::class, 'level_id');
+        return $this->hasMany(SchoolClass::class, 'level_id');
+    }
+
+    public function typeEducation()
+    {
+        return $this->belongsTo(TypeEducation::class);
     }
 }

@@ -59,7 +59,7 @@ class RolesAndPermissionsSeeder extends Seeder
         // Create permissions
         foreach ($permissionCategories as $category => $actions) {
             foreach ($actions as $action) {
-                Permission::firstOrCreate(['name' => "{$action}_{$category}", 'guard_name' => 'web']);
+                Permission::firstOrCreate(['name' => "{$action}_{$category}", 'guard_name' => 'sanctum']);
             }
         }
 
@@ -116,11 +116,11 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // Create roles and assign permissions
         foreach ($roles as $role => $permissions) {
-            $createdRole = Role::create(['name' => $role, 'guard_name' => 'web']);
+            $createdRole = Role::create(['name' => $role, 'guard_name' => 'sanctum']);
             foreach ($permissions as $permission) {
 
                 $permissionInstance = Permission::where('name', $permission)
-                    ->where('guard_name', 'web')
+                    ->where('guard_name', 'sanctum')
                     ->first();
 
                 if ($permissionInstance) {

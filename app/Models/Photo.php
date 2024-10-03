@@ -10,6 +10,9 @@ class Photo extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $keyType = 'string';
+    public $incrementing = false;
+
     protected $fillable = [
         'path', 
         'provider',

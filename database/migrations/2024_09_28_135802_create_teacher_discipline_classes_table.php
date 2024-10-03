@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('levels', function (Blueprint $table) {
+        Schema::create('teacher_discipline_class', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignId('type_education_id')->constrained('type_educations');
-            $table->string('name');
-            $table->integer('year')->unique();
+            $table->foreignUuid('teacher_id')->constrained('teachers');
+            $table->foreignUuid('discipline_id')->constrained('disciplines');
+            $table->foreignUuid('class_id')->constrained('classes');
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('levels');
+        Schema::dropIfExists('teacher_discipline_classe');
     }
 };

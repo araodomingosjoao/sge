@@ -22,6 +22,10 @@ class TypeEducationSeeder extends Seeder
         ]);
 
         TypeEducation::create([
+            'name' => 'Ensino Primario e Secundario',
+        ]);
+
+        TypeEducation::create([
             'name' => 'Ensino Médio',
         ]);
     }
