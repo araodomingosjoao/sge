@@ -2,17 +2,40 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 
-class Schedule extends Model
+class Schedule extends BaseModel
 {
-    use HasFactory;
+    use HasFactory, HasUuids;
 
-    protected $fillable = ['teacher_discipline_class_id', 'day_of_week', 'start_time', 'end_time', 'classroom', 'specific_date'];
+    protected $fillable = [
+        'teacher_id',
+        'class_id',
+        'discipline_id',
+        'classroom_id',
+        'day',
+        'start_time',
+        'end_time'
+    ];
 
-    public function teacherDisciplineClass()
+    public function teacher()
     {
-        return $this->belongsTo(TeacherDisciplineClass::class);
+        return $this->belongsTo(Teacher::class);
+    }
+
+    public function class()
+    {
+        return $this->belongsTo(SchoolClass::class);
+    }
+
+    public function discipline()
+    {
+        return $this->belongsTo(Discipline::class);
+    }
+
+    public function classroom()
+    {
+        return $this->belongsTo(Classroom::class);
     }
 }

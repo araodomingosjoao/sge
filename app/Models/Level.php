@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Level extends Model
+class Level extends BaseModel
 {
     use HasFactory, SoftDeletes, HasUuids;
 
@@ -16,11 +16,6 @@ class Level extends Model
     protected $casts = [
         'id' => 'string',
     ];
-
-    public static function getFileFields(): array
-    {
-        return [];
-    }
 
     public function classes()
     {

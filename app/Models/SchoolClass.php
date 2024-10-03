@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class SchoolClass extends Model
+class SchoolClass extends BaseModel
 {
     use HasFactory, SoftDeletes, HasUuids;
 
@@ -19,11 +19,6 @@ class SchoolClass extends Model
         'course_id' => 'string',
         'level_id' => 'string',
     ];
-
-    public static function getFileFields(): array
-    {
-        return [];
-    }
 
     public function course()
     {

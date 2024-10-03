@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('schedules', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('teacher_discipline_class_id')->constrained('teacher_discipline_class');
-            $table->string('day_of_week');
+            $table->foreignUuid('teacher_id')->constrained('teachers');
+            $table->foreignUuid('discipline_id')->constrained('disciplines');
+            $table->foreignUuid('class_id')->constrained('classes');
+            $table->foreignUuid('classroom_id')->constrained('classrooms');
+            $table->enum('day', ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']);
             $table->time('start_time');
             $table->time('end_time');
-            $table->string('classroom')->nullable();
-            $table->date('specific_date')->nullable();
             $table->timestamps();
         });
     }
