@@ -9,6 +9,7 @@ use App\Http\Controllers\LevelController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SchoolController;
 use App\Http\Controllers\SchoolRegistrationController;
+use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -40,5 +41,12 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/schedule/day/{day}', [ScheduleController::class, 'getSchedulesByDay']);
     Route::get('/schedule/classroom/availability', [ScheduleController::class, 'checkClassroomAvailability']);
     Route::get('/schedule/class/{class_id}/weekly', [ScheduleController::class, 'getWeeklyScheduleByClass']);
+    Route::apiCrud('students', StudentController::class);
+    Route::post('/students/enrollment', [StudentController::class, 'enroll']);
+    Route::put('/students/{student_id}/enrollment/{enrollment_id}', [StudentController::class, 'enroll']);
+    Route::get('/students/{student_id}/enrollments', [StudentController::class, 'getStudentEnrollments']);
+    Route::post('/students/{student_id}/transfer', [StudentController::class, 'transferStudent']);
+    Route::delete('/students/{student_id}/enrollment/{enrollment_id}', [StudentController::class, 'cancelEnrollment']);
+    Route::get('/students/class/{class_id}', [StudentController::class, 'getClassStudents']);
 
 });

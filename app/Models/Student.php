@@ -2,18 +2,17 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Student extends Model
+class Student extends BaseModel
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, HasUuids, SoftDeletes;
 
     protected $fillable = [
         'user_id',
-        'class_id',
-        'photo_id',
         'case_number',
         'address',
         'observation',
@@ -24,8 +23,6 @@ class Student extends Model
     protected $casts = [
         'id' => 'string',
         'user_id' => 'string',
-        'class_id' => 'string',
-        'photo_id' => 'string',
         'birth_date' => 'date',
     ];
 
@@ -34,13 +31,9 @@ class Student extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function class()
+    public function enrollments()
     {
-        return $this->belongsTo(SchoolClass::class, 'class_id');
+        return $this->hasMany(StudentClass::class);
     }
 
-    public function photo()
-    {
-        return $this->morphOne(Photo::class, 'imageable');
-    }
 }
