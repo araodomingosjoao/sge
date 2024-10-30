@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import AlunosRoutes from './modules/alunos';
+import AuthRoutes from './modules/auth';
 
 const routes = [
     {
@@ -8,6 +9,7 @@ const routes = [
         component: () => import('@/views/Dashboard.vue'),
         meta: { requiresAuth: true },
     },
+    ...AuthRoutes,
     ...AlunosRoutes,
 ];
 

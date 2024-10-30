@@ -29,7 +29,7 @@
                                 />
                             </div>
                         </div>
-                        <slot name="content" /> <!-- Para inserir o conteúdo das páginas -->
+                        <router-view></router-view> <!-- Para inserir o conteúdo das páginas -->
                     </div>
                 </div>
                 <!-- Footer -->
