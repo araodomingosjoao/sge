@@ -3,6 +3,7 @@
         :type="type"
         :class="['btn', btnClass]"
         @click="$emit('click')"
+        :disabled="disabled"
     >
         <i v-if="icon" :class="[icon, 'align-middle']"></i>
         <span v-if="$slots.default"><slot /></span>
@@ -25,6 +26,10 @@ export default {
             type: String,
             default: ''
         },
+        disabled: {
+            type: Boolean,
+            default: false
+        }
     },
 };
 </script>

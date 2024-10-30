@@ -1,25 +1,28 @@
 <template>
-    <form @submit.prevent="handleSubmit">
-        <slot />
+    <form @submit.stop.prevent="handleSubmit">
+        <slot></slot>
     </form>
 </template>
 
 <script>
-import { defineComponent } from 'vue';
 import { useForm } from 'vee-validate';
 
-export default defineComponent({
+export default {
     name: 'AppForm',
     setup(_, { emit }) {
-        const { handleSubmit } = useForm();
+        const { validate } = useForm();
 
-        const submitForm = handleSubmit((values) => {
-            emit('submit', values);
-        });
+        const handleSubmit = async () => {
+            const isValid = await validate();
+
+            if (isValid.valid) {
+                emit('event:submit');
+            }
+        };
 
         return {
-            handleSubmit: submitForm,
+            handleSubmit,
         };
     },
-});
+};
 </script>

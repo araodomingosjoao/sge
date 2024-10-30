@@ -3,6 +3,6 @@ export default [
         path: '/auth/login',
         name: 'Login',
         component: () => import('@/views/auth/Login.vue'),
-        meta: { requiresAuth: true, layout: 'AuthLayout' },
+        meta: { layout: 'AuthLayout' },
     },
 ];

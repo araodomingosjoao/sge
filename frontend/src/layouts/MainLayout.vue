@@ -40,8 +40,6 @@
         <!-- Botão Back to Top -->
         <BackToTopButton />
 
-        <!-- Preloader -->
-        <Preloader v-if="isLoading" />
     </div>
 </template>
 
