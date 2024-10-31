@@ -3,11 +3,17 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "vite build"
+        "build": "vite build",
+        "front:serve": "cd frontend && npm run dev",
+        "front:build": "cd frontend && npm run build",
+        "serve": "concurrently \"php artisan serve --port=8000\" \"npm run front:serve\"",
+        "deploy": "npm run setup && npm run front:build && php artisan migrate"
     },
     "devDependencies": {
         "axios": "^1.6.4",
+        "concurrently": "^9.0.1",
         "laravel-vite-plugin": "^1.0",
-        "vite": "^5.0"
+        "vite": "^5.0",
+        "vite-plugin-environment": "^1.1.3"
     }
 }

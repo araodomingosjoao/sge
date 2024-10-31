@@ -13,8 +13,7 @@ return new class extends Migration
     {
         Schema::create('students', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('user_id');
-            $table->uuid('class_id');
+            $table->foreignUuid('user_id')->constrained('users');
             $table->string('case_number')->nullable();
             $table->text('address')->nullable();
             $table->text('observation')->nullable();
@@ -22,9 +21,6 @@ return new class extends Migration
             $table->unsignedSmallInteger('status')->default(1);
             $table->timestamps();
             $table->softDeletes();
-    
-            $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('class_id')->references('id')->on('classes');
         });
     }
 

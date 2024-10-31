@@ -48,4 +48,10 @@ class SchoolClass extends BaseModel
                     ->withPivot('discipline_id')
                     ->withTimestamps();
     }
+
+    public function enrollments()
+    {
+        return $this->hasMany(StudentClass::class);
+    }
+
 }
