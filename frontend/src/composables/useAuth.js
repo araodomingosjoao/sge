@@ -1,6 +1,7 @@
 import { ref } from 'vue';
 import axios from '../plugins/axios';
 import { storage } from '../utils/storage';
+import { isTokenExpired } from '../utils/isTokenExpired';
 
 const token = ref(storage.get('access_token'));
 
@@ -20,7 +21,7 @@ export function useAuth() {
         storage.remove('access_token');
     };
 
-    const isAuthenticated = () => !!token.value;
+    const isAuthenticated = () => !!token.value && !isTokenExpired(token);
 
     return { token, login, logout, isAuthenticated };
 }
