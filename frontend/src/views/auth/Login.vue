@@ -79,7 +79,7 @@ export default {
                 router.push({ name: 'Dashboard' });
             } catch (error) {
                 Swal.error({
-                    title: "Algo correu mal. Tente novamente!",
+                    title: "Erro ao fazer login",
                     text: error.message
                 });
             } finally {

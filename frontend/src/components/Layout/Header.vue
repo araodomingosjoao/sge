@@ -34,21 +34,37 @@
 
                 <div class="d-flex align-items-center">
                     <!-- Dark/Light Mode Toggle -->
-                    <button type="button" class="btn btn-icon btn-topbar btn-ghost-secondary rounded-circle" @click="toggleDarkMode">
+                    <button type="button" class="btn btn-icon btn-topbar btn-ghost-secondary rounded-circle"
+                        @click="toggleDarkMode">
                         <i :class="isDarkMode ? 'bx bx-sun' : 'bx bx-moon'"></i>
                     </button>
 
                     <!-- User Profile Dropdown -->
-                    <div class="dropdown ms-3 header-item topbar-user">
-                        <button type="button" class="btn" data-bs-toggle="dropdown">
+                    <div class="dropdown ms-sm-3 header-item topbar-user">
+                        <button type="button" class="btn" id="page-header-user-dropdown" data-bs-toggle="dropdown"
+                            aria-haspopup="true" aria-expanded="false">
                             <span class="d-flex align-items-center">
-                                <img class="rounded-circle header-profile-user" src="/assets_velzon/images/users/avatar-1.jpg" alt="User Avatar">
-                                <span class="d-none d-xl-inline-block ms-2">Anna Adame</span>
+                                <img class="rounded-circle header-profile-user" src="/assets_velzon/images/users/avatar-1.jpg"
+                                    alt="Header Avatar">
+                                <span class="text-start ms-xl-2">
+                                    <span class="d-none d-xl-inline-block ms-1 fw-medium user-name-text">Anna
+                                        Adame</span>
+                                    <span class="d-none d-xl-block ms-1 fs-12 user-name-sub-text">Founder</span>
+                                </span>
                             </span>
                         </button>
                         <div class="dropdown-menu dropdown-menu-end">
-                            <a class="dropdown-item" href="/profile"><i class="mdi mdi-account-circle"></i> Profile</a>
-                            <a class="dropdown-item" href="/logout"><i class="mdi mdi-logout"></i> Logout</a>
+                            <h6 class="dropdown-header">Welcome Anna!</h6>
+                            <template v-for="item in menuHeader" :key="item.name">
+                                <a v-if="item.action !== 'logout'" class="dropdown-item" :href="item.link">
+                                    <i :class="item.icon + ' text-muted fs-16 align-middle me-1'"></i>
+                                    <span class="align-middle">{{ item.label }}</span>
+                                </a>
+                                <a v-else class="dropdown-item" @click.prevent="handleLogout">
+                                    <i :class="item.icon + ' text-muted fs-16 align-middle me-1'"></i>
+                                    <span class="align-middle">{{ item.label }}</span>
+                                </a>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -58,12 +74,26 @@
 </template>
 
 <script>
+import { menuHeader } from '../../config/menuHeader';
+import { useAuth } from '../../composables/useAuth';
+
 export default {
     name: 'Header',
     data() {
         return {
             isDarkMode: false,
+            menuHeader: menuHeader
         };
+    },
+    setup() {
+        const { logout } = useAuth();
+
+        const handleLogout = () => {
+            logout();
+            window.location.href = '/auth/login';
+        };
+
+        return { handleLogout };
     },
     methods: {
         toggleDarkMode() {
@@ -73,6 +103,3 @@ export default {
 };
 </script>
 
-<style scoped>
-/* Estilize conforme necessário */
-</style>
