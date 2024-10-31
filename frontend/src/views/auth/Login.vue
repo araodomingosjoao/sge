@@ -48,7 +48,8 @@
 
 <script>
 import { ref } from 'vue';
-import { useAuth } from '@/composables/useAuth';
+import { useAuth } from '../../composables/useAuth';
+import { useUser } from '../../composables/useUser';
 import router from '../../router'
 import Swal from '../../utils/swal';
 import AppForm from '../../components/UI/AppForm.vue';
@@ -71,11 +72,13 @@ export default {
         const password = ref('');
         const isLoading = ref(false);
         const { login } = useAuth();
+        const { fetchUser } = useUser();
 
         const onLogin = async () => {
             isLoading.value = true
             try {
                 await login(email.value, password.value);
+                await fetchUser()
                 router.push({ name: 'Dashboard' });
             } catch (error) {
                 Swal.error({

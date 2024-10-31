@@ -47,9 +47,8 @@
                                 <img class="rounded-circle header-profile-user" src="/assets_velzon/images/users/avatar-1.jpg"
                                     alt="Header Avatar">
                                 <span class="text-start ms-xl-2">
-                                    <span class="d-none d-xl-inline-block ms-1 fw-medium user-name-text">Anna
-                                        Adame</span>
-                                    <span class="d-none d-xl-block ms-1 fs-12 user-name-sub-text">Founder</span>
+                                    <span class="d-none d-xl-inline-block ms-1 fw-medium user-name-text">{{ userFullName }}</span>
+                                    <span class="d-none d-xl-block ms-1 fs-12 user-name-sub-text">{{ isAdmin ? 'Administrador' : '' }}</span>
                                 </span>
                             </span>
                         </button>
@@ -74,8 +73,10 @@
 </template>
 
 <script>
+import { computed } from 'vue';
 import { menuHeader } from '../../config/menuHeader';
 import { useAuth } from '../../composables/useAuth';
+import { useUserStore } from '../../stores/userStore';
 
 export default {
     name: 'Header',
@@ -86,6 +87,12 @@ export default {
         };
     },
     setup() {
+
+        const userStore = useUserStore();
+        const { user, isAdmin, permissions } = userStore;
+        
+        console.log(user);
+        
         const { logout } = useAuth();
 
         const handleLogout = () => {
@@ -93,7 +100,9 @@ export default {
             window.location.href = '/auth/login';
         };
 
-        return { handleLogout };
+        const userFullName = computed(() => user ? `${user?.first_name} ${user?.last_name}` : '');
+
+        return { handleLogout, user, isAdmin, permissions, userFullName};
     },
     methods: {
         toggleDarkMode() {
