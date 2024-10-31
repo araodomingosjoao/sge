@@ -17,18 +17,3 @@
   };
   </script>
   
-  <style scoped>
-  .not-found {
-    text-align: center;
-    margin-top: 50px;
-  }
-  .not-found h1 {
-    font-size: 5rem;
-    color: #f06548;
-  }
-  .not-found p {
-    font-size: 1.5rem;
-    color: #555;
-  }
-  </style>
-  
