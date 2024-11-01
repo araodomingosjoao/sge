@@ -1,12 +1,14 @@
 import axios from 'axios';
 import { storage } from '../utils/storage';
 import router from '../router';
-import { useAuth } from '../composables/useAuth';
-
-const { logout } = useAuth();
 
 const instance = axios.create({
     baseURL: 'http://localhost:8000/api',
+    timeout: 10000,
+    headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    }
 });
 
 instance.interceptors.request.use((config) => {
@@ -21,17 +23,11 @@ instance.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            logout();
+            storage.remove('access_token');
             router.push({ name: 'Login' });
         }
         return Promise.reject(error);
     }
 );
-
-const expirationTime = 60 * 30000;
-setTimeout(() => {
-    logout();
-    router.push({ name: 'Login' });
-}, expirationTime);
 
 export default instance;
