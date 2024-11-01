@@ -22,4 +22,10 @@ export const useUserStore = defineStore({
             this.role = '';
         },
     },
+    persist: {
+        enabled: true,
+        strategies: [
+            { storage: localStorage, paths: ['user', 'permissions', 'role'] }
+        ],
+    },
 });
