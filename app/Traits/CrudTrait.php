@@ -6,10 +6,125 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\ApiResponse;
 
+/**
+ * @OA\Info(
+ *    title="API Documentation",
+ *    version="1.0.0"
+ * )
+ */
 trait CrudTrait
 {
     protected $repository;
 
+    /**
+     * Convert Laravel validation rules to OpenAPI schema type
+     */
+    protected function getSchemaTypeFromRules(string $rules): array
+    {
+        $types = [
+            'type' => 'string',
+            'format' => null,
+            'required' => false
+        ];
+
+        $rules = explode('|', $rules);
+        
+        if (in_array('required', $rules)) {
+            $types['required'] = true;
+        }
+
+        if (in_array('numeric', $rules) || in_array('integer', $rules)) {
+            $types['type'] = 'integer';
+        }
+
+        if (in_array('boolean', $rules)) {
+            $types['type'] = 'boolean';
+        }
+
+        if (in_array('array', $rules)) {
+            $types['type'] = 'array';
+        }
+
+        if (in_array('date', $rules)) {
+            $types['format'] = 'date';
+        }
+
+        foreach ($rules as $rule) {
+            if (strpos($rule, 'max:') === 0) {
+                $types['maxLength'] = (int)substr($rule, 4);
+            }
+            if (strpos($rule, 'min:') === 0) {
+                $types['minimum'] = (int)substr($rule, 4);
+            }
+        }
+
+        return $types;
+    }
+
+    /**
+     * Get OpenAPI schema for validation rules
+     */
+    protected function getSchemaFromRules(array $rules): array
+    {
+        $properties = [];
+        $required = [];
+
+        foreach ($rules as $field => $rule) {
+            $types = $this->getSchemaTypeFromRules($rule);
+            
+            if ($types['required']) {
+                $required[] = $field;
+            }
+
+            $property = [
+                'type' => $types['type']
+            ];
+
+            if ($types['format']) {
+                $property['format'] = $types['format'];
+            }
+
+            if (isset($types['maxLength'])) {
+                $property['maxLength'] = $types['maxLength'];
+            }
+
+            if (isset($types['minimum'])) {
+                $property['minimum'] = $types['minimum'];
+            }
+
+            $properties[$field] = $property;
+        }
+
+        return [
+            'properties' => $properties,
+            'required' => $required
+        ];
+    }
+
+    /**
+     * Create a new record
+     * 
+     * @OA\Post(
+     *     path="/{resource}",
+     *     summary="Create a new record",
+     *     @OA\Parameter(
+     *         name="resource",
+     *         in="path",
+     *         required=true,
+     *         description="Resource name"
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="Request body generated from storeValidationRules"
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Created successfully"
+     *     ),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=500, description="Server error")
+     * )
+     */
     public function create(Request $request)
     {
         $this->validateRequest($request, $this->storeValidationRules);
@@ -23,6 +138,17 @@ trait CrudTrait
         }
     }
 
+    /**
+     * Get specific record
+     * 
+     * @OA\Get(
+     *     path="/{resource}/{id}",
+     *     @OA\Parameter(name="resource", in="path", required=true),
+     *     @OA\Parameter(name="id", in="path", required=true),
+     *     @OA\Response(response=200, description="Success"),
+     *     @OA\Response(response=404, description="Not found")
+     * )
+     */
     public function read($id)
     {
         $record = $this->repository->find($id);
@@ -32,6 +158,22 @@ trait CrudTrait
         return ApiResponse::error('Record not found', 404);
     }
 
+    /**
+     * Update record
+     * 
+     * @OA\Put(
+     *     path="/{resource}/{id}",
+     *     @OA\Parameter(name="resource", in="path", required=true),
+     *     @OA\Parameter(name="id", in="path", required=true),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="Request body generated from updateValidationRules"
+     *     ),
+     *     @OA\Response(response=200, description="Updated successfully"),
+     *     @OA\Response(response=404, description="Not found"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     */
     public function update(Request $request, $id)
     {
         $this->applyUniqueValidationRules($id);
@@ -49,6 +191,17 @@ trait CrudTrait
         }
     }
 
+    /**
+     * Delete record
+     * 
+     * @OA\Delete(
+     *     path="/{resource}/{id}",
+     *     @OA\Parameter(name="resource", in="path", required=true),
+     *     @OA\Parameter(name="id", in="path", required=true),
+     *     @OA\Response(response=200, description="Deleted successfully"),
+     *     @OA\Response(response=404, description="Not found")
+     * )
+     */
     public function delete($id)
     {
         try {
@@ -62,6 +215,43 @@ trait CrudTrait
         }
     }
 
+    /**
+     * Get paginated list of records
+     * 
+     * @OA\Get(
+     *     path="/{resource}",
+     *     @OA\Parameter(
+     *         name="resource",
+     *         in="path",
+     *         required=true
+     *     ),
+     *     @OA\Parameter(
+     *         name="search",
+     *         in="query",
+     *         required=false,
+     *         description="Search term"
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         schema={"type"="integer", "default"=15}
+     *     ),
+     *     @OA\Parameter(
+     *         name="sort_column",
+     *         in="query",
+     *         schema={"type"="string", "default"="id"}
+     *     ),
+     *     @OA\Parameter(
+     *         name="sort_direction",
+     *         in="query",
+     *         schema={"type"="string", "enum"={"asc","desc"}, "default"="asc"}
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success"
+     *     )
+     * )
+     */
     public function index(Request $request)
     {
         $filters = $request->query('filters', []);

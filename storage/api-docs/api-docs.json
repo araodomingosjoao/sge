@@ -1,0 +1,240 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API Documentation",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/{resource}": {
+            "get": {
+                "tags": [
+                    "CRUD Operations"
+                ],
+                "summary": "Get paginated list of records",
+                "operationId": "d9f36c4b5cb95bbd79eb7f4710e1d19d",
+                "parameters": [
+                    {
+                        "name": "resource",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search term",
+                        "required": false
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    },
+                    {
+                        "name": "sort_column",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "default": "id"
+                        }
+                    },
+                    {
+                        "name": "sort_direction",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ],
+                            "default": "asc"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "CRUD Operations"
+                ],
+                "summary": "Create a new record",
+                "description": "Create a new record",
+                "operationId": "c540c068ce5f4efdf8b7fbee8eba120d",
+                "parameters": [
+                    {
+                        "name": "resource",
+                        "in": "path",
+                        "description": "Resource name",
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "description": "Request body generated from storeValidationRules",
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "500": {
+                        "description": "Server error"
+                    }
+                }
+            }
+        },
+        "/{resource}/{id}": {
+            "get": {
+                "tags": [
+                    "CRUD Operations"
+                ],
+                "summary": "Get specific record",
+                "operationId": "519d648cefff8bfab7be8e5966ba7dd5",
+                "parameters": [
+                    {
+                        "name": "resource",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "CRUD Operations"
+                ],
+                "summary": "Update record",
+                "operationId": "5d20cccfdaef80de8ea9057636aab281",
+                "parameters": [
+                    {
+                        "name": "resource",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "description": "Request body generated from updateValidationRules",
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated successfully"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "CRUD Operations"
+                ],
+                "summary": "Delete record",
+                "operationId": "81b4e22748c872c38075b158ac97c98d",
+                "parameters": [
+                    {
+                        "name": "resource",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Deleted successfully"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "LevelStoreRequest": {
+                "description": "Level creation request",
+                "required": [
+                    "name",
+                    "type_education_id",
+                    "year"
+                ],
+                "properties": {
+                    "name": {
+                        "description": "Level name",
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "type_education_id": {
+                        "description": "Type of education ID",
+                        "type": "string"
+                    },
+                    "year": {
+                        "description": "Year of the level",
+                        "type": "integer",
+                        "minimum": 1
+                    }
+                },
+                "type": "object"
+            },
+            "LevelUpdateRequest": {
+                "description": "Level update request",
+                "properties": {
+                    "name": {
+                        "description": "Level name",
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "type_education_id": {
+                        "description": "Type of education ID",
+                        "type": "string"
+                    },
+                    "year": {
+                        "description": "Year of the level",
+                        "type": "integer",
+                        "minimum": 1
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "CRUD Operations",
+            "description": "CRUD Operations"
+        }
+    ]
+}
