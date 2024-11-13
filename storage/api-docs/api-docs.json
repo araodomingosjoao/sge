@@ -1625,6 +1625,159 @@
                 }
             }
         },
+        "/api/students/enroll": {
+            "post": {
+                "tags": [
+                    "Students"
+                ],
+                "summary": "Enroll a student in a class",
+                "operationId": "ede9bb45f3e07c3cb2d22452da174c75",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "student_id",
+                                    "class_id",
+                                    "academic_year"
+                                ],
+                                "properties": {
+                                    "student_id": {
+                                        "type": "string"
+                                    },
+                                    "class_id": {
+                                        "type": "string"
+                                    },
+                                    "academic_year": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Student enrolled successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Student already enrolled"
+                    },
+                    "500": {
+                        "description": "Error enrolling student"
+                    }
+                }
+            }
+        },
+        "/api/students/{student_id}/enrollments/{enrollment_id}/status": {
+            "patch": {
+                "tags": [
+                    "Students"
+                ],
+                "summary": "Update academic status of a student's enrollment",
+                "operationId": "68c1b08b3e30211f2475a65ba29c9b7e",
+                "parameters": [
+                    {
+                        "name": "student_id",
+                        "in": "path",
+                        "description": "ID of the student",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "enrollment_id",
+                        "in": "path",
+                        "description": "ID of the enrollment",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status_academic"
+                                ],
+                                "properties": {
+                                    "status_academic": {
+                                        "type": "string",
+                                        "example": "promoted, repeated, transferred"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Academic status updated successfully"
+                    },
+                    "404": {
+                        "description": "Enrollment not found"
+                    }
+                }
+            }
+        },
+        "/api/students/progress": {
+            "post": {
+                "tags": [
+                    "Students"
+                ],
+                "summary": "Handle student progress",
+                "operationId": "22d7be7501622276469b272dfcb0f922",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "student_id",
+                                    "academic_year"
+                                ],
+                                "properties": {
+                                    "student_id": {
+                                        "type": "string"
+                                    },
+                                    "next_class_id": {
+                                        "type": "string"
+                                    },
+                                    "academic_year": {
+                                        "type": "string"
+                                    },
+                                    "progress_status": {
+                                        "type": "string",
+                                        "example": "promoted, repeated, transferred"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Student progress updated successfully"
+                    },
+                    "500": {
+                        "description": "Error updating student progress"
+                    }
+                }
+            }
+        },
         "/api/students/{student_id}/enrollments": {
             "get": {
                 "tags": [
@@ -1654,6 +1807,56 @@
                                 }
                             }
                         }
+                    }
+                }
+            }
+        },
+        "/api/students/{student_id}/transfer": {
+            "post": {
+                "tags": [
+                    "Students"
+                ],
+                "summary": "Transfer a student to a new class",
+                "operationId": "f6fdbd51eba189cb91b4fd964a946fae",
+                "parameters": [
+                    {
+                        "name": "student_id",
+                        "in": "path",
+                        "description": "ID of the student",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "new_class_id",
+                                    "current_academic_year"
+                                ],
+                                "properties": {
+                                    "new_class_id": {
+                                        "type": "string"
+                                    },
+                                    "current_academic_year": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Student transferred successfully"
+                    },
+                    "404": {
+                        "description": "Student not found"
                     }
                 }
             }
@@ -1698,74 +1901,6 @@
     },
     "components": {
         "schemas": {
-            "EnrollmentRequest": {
-                "required": [
-                    "student_id",
-                    "class_id",
-                    "academic_year"
-                ],
-                "properties": {
-                    "student_id": {
-                        "type": "string"
-                    },
-                    "class_id": {
-                        "type": "string"
-                    },
-                    "academic_year": {
-                        "type": "string"
-                    }
-                },
-                "type": "object"
-            },
-            "EnrollmentStatusRequest": {
-                "required": [
-                    "status_academic"
-                ],
-                "properties": {
-                    "status_academic": {
-                        "type": "string",
-                        "example": "promoted, repeated, transferred"
-                    }
-                },
-                "type": "object"
-            },
-            "StudentProgressRequest": {
-                "required": [
-                    "student_id",
-                    "academic_year"
-                ],
-                "properties": {
-                    "student_id": {
-                        "type": "string"
-                    },
-                    "next_class_id": {
-                        "type": "string"
-                    },
-                    "academic_year": {
-                        "type": "string"
-                    },
-                    "progress_status": {
-                        "type": "string",
-                        "example": "promoted, repeated, transferred"
-                    }
-                },
-                "type": "object"
-            },
-            "TransferRequest": {
-                "required": [
-                    "new_class_id",
-                    "current_academic_year"
-                ],
-                "properties": {
-                    "new_class_id": {
-                        "type": "string"
-                    },
-                    "current_academic_year": {
-                        "type": "integer"
-                    }
-                },
-                "type": "object"
-            },
             "ClassStoreRequest": {
                 "required": [
                     "name",

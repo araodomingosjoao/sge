@@ -236,7 +236,13 @@ class StudentController extends Controller
      *     tags={"Students"},
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/EnrollmentRequest")
+     *         @OA\JsonContent(
+     *             type="object",
+     *             required={"student_id", "class_id", "academic_year"},
+     *             @OA\Property(property="student_id", type="string"),
+     *             @OA\Property(property="class_id", type="string"),
+     *             @OA\Property(property="academic_year", type="string")
+     *          )
      *     ),
      *     @OA\Response(
      *         response=201,
@@ -254,16 +260,6 @@ class StudentController extends Controller
      * )
      */
 
-    /**
-     * @OA\Schema(
-     *     schema="EnrollmentRequest",
-     *     type="object",
-     *     required={"student_id", "class_id", "academic_year"},
-     *     @OA\Property(property="student_id", type="string"),
-     *     @OA\Property(property="class_id", type="string"),
-     *     @OA\Property(property="academic_year", type="string")
-     * )
-     */
     public function enroll(Request $request)
     {
         $validated = $request->validate([
@@ -323,7 +319,15 @@ class StudentController extends Controller
      *     ),
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/EnrollmentStatusRequest")
+     *         @OA\JsonContent(
+     *             type="object",
+     *             required={"status_academic"},
+     *             @OA\Property(
+     *                 property="status_academic",
+     *                 type="string",
+     *                 example="promoted, repeated, transferred"
+     *             )
+     *         )
      *     ),
      *     @OA\Response(
      *         response=200,
@@ -333,15 +337,6 @@ class StudentController extends Controller
      *         response=404,
      *         description="Enrollment not found"
      *     )
-     * )
-     */
-
-    /**
-     * @OA\Schema(
-     *     schema="EnrollmentStatusRequest",
-     *     type="object",
-     *     required={"status_academic"},
-     *     @OA\Property(property="status_academic", type="string", example="promoted, repeated, transferred")
      * )
      */
     public function updateEnrollmentStatus($student_id, $enrollment_id, Request $request)
@@ -367,7 +362,14 @@ class StudentController extends Controller
      *     tags={"Students"},
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/StudentProgressRequest")
+     *         @OA\JsonContent(
+     *              type="object",
+     *              required={"student_id", "academic_year"},
+     *              @OA\Property(property="student_id", type="string"),
+     *              @OA\Property(property="next_class_id", type="string"),
+     *              @OA\Property(property="academic_year", type="string"),
+     *              @OA\Property(property="progress_status", type="string", example="promoted, repeated, transferred"),
+     *         )
      *     ),
      *     @OA\Response(
      *         response=200,
@@ -377,18 +379,6 @@ class StudentController extends Controller
      *         response=500,
      *         description="Error updating student progress"
      *     )
-     * )
-     */
-
-    /**
-     * @OA\Schema(
-     *     schema="StudentProgressRequest",
-     *     type="object",
-     *     required={"student_id", "academic_year"},
-     *     @OA\Property(property="student_id", type="string"),
-     *     @OA\Property(property="next_class_id", type="string"),
-     *     @OA\Property(property="academic_year", type="string"),
-     *     @OA\Property(property="progress_status", type="string", example="promoted, repeated, transferred"),
      * )
      */
     public function handleStudentProgress(Request $request)
@@ -431,11 +421,11 @@ class StudentController extends Controller
      *     summary="Retrieve student's enrollment history",
      *     tags={"Students"},
      *     @OA\Parameter(
-     *         name="student_id",
-     *         in="path",
-     *         required=true,
-     *         description="ID of the student",
-     *         @OA\Schema(type="string")
+     *          name="student_id",
+     *          in="path",
+     *          required=true,
+     *          description="ID of the student",
+     *          @OA\Schema(type="string")
      *     ),
      *     @OA\Response(
      *         response=200,
@@ -471,7 +461,12 @@ class StudentController extends Controller
      *     ),
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/TransferRequest")
+     *         @OA\JsonContent(
+     *              type="object",
+     *              required={"new_class_id", "current_academic_year"},
+     *              @OA\Property(property="new_class_id", type="string"),
+     *              @OA\Property(property="current_academic_year", type="integer"),
+     *          )
      *     ),
      *     @OA\Response(
      *         response=200,
@@ -481,16 +476,6 @@ class StudentController extends Controller
      *         response=404,
      *         description="Student not found"
      *     )
-     * )
-     */
-
-    /**
-     * @OA\Schema(
-     *     schema="TransferRequest",
-     *     type="object",
-     *     required={"new_class_id", "current_academic_year"},
-     *     @OA\Property(property="new_class_id", type="string"),
-     *     @OA\Property(property="current_academic_year", type="integer"),
      * )
      */
     public function transferStudent(Request $request, $student_id)
