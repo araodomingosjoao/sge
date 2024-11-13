@@ -20,28 +20,42 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
+/**
+ * @OA\Tag(
+ *     name="Students",
+ *     description="API Endpoints for Students"
+ * )
+ */
 class StudentController extends Controller
 {
-    use CrudTrait;
 
-    protected $storeValidationRules = [];
-    protected $updateValidationRules = [];
-    
-    protected $uniqueFields = [];
-
-    protected $resource = StudentResource::class;
-    protected $resourceDetails = StudentResource::class;
+    protected $repository;
     protected $fileUploadService;
 
     public function __construct(
         StudentRepository $repository,
         FileUploadService $fileUploadService
-    )
-    {
+    ) {
         $this->repository = $repository;
         $this->fileUploadService = $fileUploadService;
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/students/trashed",
+     *     summary="Retrieve trashed students",
+     *     tags={"Students"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of trashed students retrieved successfully",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Server error"
+     *     )
+     * )
+     */
     public function trashed()
     {
         $students = Student::onlyTrashed()->get();
@@ -49,14 +63,61 @@ class StudentController extends Controller
         return ApiResponse::success($students, 'Trashed students retrieved successfully');
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/students/restore/{id}",
+     *     summary="Restore a trashed student",
+     *     tags={"Students"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID of the trashed student to restore",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Student restored successfully",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Student not found"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Server error"
+     *     )
+     * )
+     */
     public function restore($id)
     {
         $student = Student::onlyTrashed()->findOrFail($id);
         $student->restore();
 
         return ApiResponse::success($student, 'Trashed students retrieved successfully');
-
     }
+
+    /**
+     * @OA\Post(
+     *     path="/api/students",
+     *     summary="Create a new student",
+     *     tags={"Students"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/StudentStoreRequest")
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Student created successfully",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Error creating student"
+     *     )
+     * )
+     */
 
     public function create(StudentStoreRequest $request)
     {
@@ -65,14 +126,14 @@ class StudentController extends Controller
         try {
             $requestData = $request->validationData();
             $requestData['password'] = Hash::make($requestData['password']);
-    
+
             if ($request->hasFile('profile_picture_path')) {
                 $requestData['profile_picture_path'] = $this->fileUploadService->handleSingleFile(
-                    $request->file('profile_picture_path'), 
+                    $request->file('profile_picture_path'),
                     User::getFileFields()['profile_picture_path']
                 );
             }
-    
+
             $user = User::create($requestData);
             $student = Student::create([
                 'user_id' => $user->id,
@@ -81,7 +142,7 @@ class StudentController extends Controller
                 'case_number' => $request->case_number,
                 'observation' => $request->observation,
             ]);
-            
+
             $role = Role::findOrCreate('student', 'web');
             $user->assignRole($role);
 
@@ -95,6 +156,33 @@ class StudentController extends Controller
         }
     }
 
+    /**
+     * @OA\Put(
+     *     path="/api/students/{id}",
+     *     summary="Update an existing student",
+     *     tags={"Students"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID of the student to update",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/StudentStoreRequest")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Student updated successfully",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Error updating student"
+     *     )
+     * )
+     */
     public function update(StudentStoreRequest $request, string $id)
     {
         DB::beginTransaction();
@@ -107,27 +195,27 @@ class StudentController extends Controller
             if (isset($requestData['password'])) {
                 $requestData['password'] = Hash::make($requestData['password']);
             }
-    
+
             if ($request->hasFile('profile_picture_path')) {
                 $this->fileUploadService->deleteOldFile(
                     $user->profile_picture_path,
                     User::getFileFields()['profile_picture_path']['disk']
                 );
                 $requestData['profile_picture_path'] = $this->fileUploadService->handleSingleFile(
-                    $request->file('profile_picture_path'), 
+                    $request->file('profile_picture_path'),
                     User::getFileFields()['profile_picture_path']
                 );
             }
 
             $user->update($requestData);
-    
+
             $student->update([
                 'address' => $request->address,
                 'birth_date' => $request->birth_date,
                 'case_number' => $request->case_number,
                 'observation' => $request->observation,
             ]);
-            
+
             $role = Role::findOrCreate('student', 'web');
             $user->syncRoles([$role]);
 
@@ -141,6 +229,41 @@ class StudentController extends Controller
         }
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/students/enroll",
+     *     summary="Enroll a student in a class",
+     *     tags={"Students"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/EnrollmentRequest")
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Student enrolled successfully",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Student already enrolled"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Error enrolling student"
+     *     )
+     * )
+     */
+
+    /**
+     * @OA\Schema(
+     *     schema="EnrollmentRequest",
+     *     type="object",
+     *     required={"student_id", "class_id", "academic_year"},
+     *     @OA\Property(property="student_id", type="string"),
+     *     @OA\Property(property="class_id", type="string"),
+     *     @OA\Property(property="academic_year", type="string")
+     * )
+     */
     public function enroll(Request $request)
     {
         $validated = $request->validate([
@@ -178,7 +301,49 @@ class StudentController extends Controller
             return ApiResponse::error('Error occurred during enrollment: ' . $e->getMessage(), 500);
         }
     }
-    
+
+    /**
+     * @OA\Patch(
+     *     path="/api/students/{student_id}/enrollments/{enrollment_id}/status",
+     *     summary="Update academic status of a student's enrollment",
+     *     tags={"Students"},
+     *     @OA\Parameter(
+     *         name="student_id",
+     *         in="path",
+     *         required=true,
+     *         description="ID of the student",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="enrollment_id",
+     *         in="path",
+     *         required=true,
+     *         description="ID of the enrollment",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/EnrollmentStatusRequest")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Academic status updated successfully"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Enrollment not found"
+     *     )
+     * )
+     */
+
+    /**
+     * @OA\Schema(
+     *     schema="EnrollmentStatusRequest",
+     *     type="object",
+     *     required={"status_academic"},
+     *     @OA\Property(property="status_academic", type="string", example="promoted, repeated, transferred")
+     * )
+     */
     public function updateEnrollmentStatus($student_id, $enrollment_id, Request $request)
     {
         $validated = $request->validate([
@@ -195,6 +360,37 @@ class StudentController extends Controller
         return response()->json(['message' => 'Academic status updated successfully.']);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/students/progress",
+     *     summary="Handle student progress",
+     *     tags={"Students"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/StudentProgressRequest")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Student progress updated successfully"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Error updating student progress"
+     *     )
+     * )
+     */
+
+    /**
+     * @OA\Schema(
+     *     schema="StudentProgressRequest",
+     *     type="object",
+     *     required={"student_id", "academic_year"},
+     *     @OA\Property(property="student_id", type="string"),
+     *     @OA\Property(property="next_class_id", type="string"),
+     *     @OA\Property(property="academic_year", type="string"),
+     *     @OA\Property(property="progress_status", type="string", example="promoted, repeated, transferred"),
+     * )
+     */
     public function handleStudentProgress(Request $request)
     {
         $validated = $request->validate([
@@ -229,6 +425,28 @@ class StudentController extends Controller
         return response()->json(['message' => 'Student progress updated successfully.']);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/students/{student_id}/enrollments",
+     *     summary="Retrieve student's enrollment history",
+     *     tags={"Students"},
+     *     @OA\Parameter(
+     *         name="student_id",
+     *         in="path",
+     *         required=true,
+     *         description="ID of the student",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Student enrollments retrieved successfully",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items()
+     *         )
+     *     )
+     * )
+     */
     public function getStudentEnrollments($student_id)
     {
         $enrollments = StudentClass::where('student_id', $student_id)
@@ -239,6 +457,42 @@ class StudentController extends Controller
         return response()->json($enrollments);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/students/{student_id}/transfer",
+     *     summary="Transfer a student to a new class",
+     *     tags={"Students"},
+     *     @OA\Parameter(
+     *         name="student_id",
+     *         in="path",
+     *         required=true,
+     *         description="ID of the student",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/TransferRequest")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Student transferred successfully"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Student not found"
+     *     )
+     * )
+     */
+
+    /**
+     * @OA\Schema(
+     *     schema="TransferRequest",
+     *     type="object",
+     *     required={"new_class_id", "current_academic_year"},
+     *     @OA\Property(property="new_class_id", type="string"),
+     *     @OA\Property(property="current_academic_year", type="integer"),
+     * )
+     */
     public function transferStudent(Request $request, $student_id)
     {
         $validated = $request->validate([
@@ -268,6 +522,35 @@ class StudentController extends Controller
         return response()->json(['message' => 'Student transferred successfully.']);
     }
 
+    /**
+     * @OA\Delete(
+     *     path="/api/students/{student_id}/enrollments/{enrollment_id}",
+     *     summary="Cancel an enrollment",
+     *     tags={"Students"},
+     *     @OA\Parameter(
+     *         name="student_id",
+     *         in="path",
+     *         required=true,
+     *         description="ID of the student",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="enrollment_id",
+     *         in="path",
+     *         required=true,
+     *         description="ID of the enrollment to cancel",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Enrollment canceled successfully"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Enrollment not found"
+     *     )
+     * )
+     */
     public function cancelEnrollment($student_id, $enrollment_id)
     {
         $enrollment = StudentClass::where('id', $enrollment_id)
@@ -279,5 +562,4 @@ class StudentController extends Controller
 
         return response()->json(['message' => 'Enrollment canceled successfully.']);
     }
-
 }

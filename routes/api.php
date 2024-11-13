@@ -24,6 +24,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         'delete' => 'role:admin_school' 
     ]);
     Route::get('/user/profile', [AuthController::class, 'profile']);
+    Route::get('/auth/logout', [AuthController::class, 'logout']);
     Route::apiCrud('user', UserController::class);
     Route::apiCrud('level', LevelController::class);
     Route::apiCrud('discipline', DisciplineController::class);

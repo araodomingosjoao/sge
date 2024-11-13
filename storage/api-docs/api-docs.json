@@ -1,32 +1,183 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "API Documentation",
+        "title": "API de Gestão Escolar",
+        "description": "API para gerenciamento de sistema escolar.",
+        "contact": {
+            "email": "suporte@exemplo.com"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
         "version": "1.0.0"
     },
+    "servers": [
+        {
+            "url": "/api"
+        }
+    ],
     "paths": {
-        "/{resource}": {
+        "/auth/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "User login",
+                "description": "Login a user and receive a Bearer token",
+                "operationId": "8cb7742ae98d0990acb2907c4e00bf24",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful login",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "access_token": {
+                                            "type": "string",
+                                            "example": "your_access_token"
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials"
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "User logout",
+                "description": "Logout the current user and invalidate the token",
+                "operationId": "0d29c740dc06d77602af8095bf4654cc",
+                "responses": {
+                    "200": {
+                        "description": "Successful logout",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Logged out successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/user/profile": {
             "get": {
                 "tags": [
-                    "CRUD Operations"
+                    "Auth"
                 ],
-                "summary": "Get paginated list of records",
-                "operationId": "d9f36c4b5cb95bbd79eb7f4710e1d19d",
-                "parameters": [
+                "summary": "Get user profile",
+                "description": "Retrieve the profile information of the logged-in user",
+                "operationId": "e03e8d2f281c6476ae23fe430f36b12a",
+                "responses": {
+                    "200": {
+                        "description": "User profile data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "user": {
+                                            "$ref": "#/components/schemas/User"
+                                        },
+                                        "role": {
+                                            "type": "string",
+                                            "example": "Admin"
+                                        },
+                                        "permissions": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "example": "edit_posts"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
                     {
-                        "name": "resource",
-                        "in": "path",
-                        "required": true
-                    },
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/class": {
+            "get": {
+                "tags": [
+                    "Class"
+                ],
+                "summary": "List classs with pagination",
+                "description": "Get paginated list of classes",
+                "operationId": "e8e6533c4e6625ed2c8c24b9a50b4477",
+                "parameters": [
                     {
                         "name": "search",
                         "in": "query",
-                        "description": "Search term",
-                        "required": false
+                        "description": "Search term for filtering classs",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
                     },
                     {
                         "name": "per_page",
                         "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
                         "schema": {
                             "type": "integer",
                             "default": 15
@@ -35,6 +186,8 @@
                     {
                         "name": "sort_column",
                         "in": "query",
+                        "description": "Column to sort by",
+                        "required": false,
                         "schema": {
                             "type": "string",
                             "default": "id"
@@ -43,47 +196,1317 @@
                     {
                         "name": "sort_direction",
                         "in": "query",
+                        "description": "Direction for sorting (asc or desc)",
+                        "required": false,
                         "schema": {
                             "type": "string",
+                            "default": "asc",
                             "enum": [
                                 "asc",
                                 "desc"
-                            ],
-                            "default": "asc"
+                            ]
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success"
+                        "description": "List of classs",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ClassResource"
+                                    }
+                                }
+                            }
+                        }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
-                    "CRUD Operations"
+                    "Class"
                 ],
-                "summary": "Create a new record",
-                "description": "Create a new record",
-                "operationId": "c540c068ce5f4efdf8b7fbee8eba120d",
-                "parameters": [
-                    {
-                        "name": "resource",
-                        "in": "path",
-                        "description": "Resource name",
-                        "required": true
-                    }
-                ],
+                "summary": "Create a new class",
+                "description": "Create a new class",
+                "operationId": "edea860f0dc38c561ea48acfb3cbac59",
                 "requestBody": {
-                    "description": "Request body generated from storeValidationRules",
-                    "required": true
+                    "description": "JSON object containing new class data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ClassStoreRequest"
+                            }
+                        }
+                    }
                 },
                 "responses": {
                     "201": {
-                        "description": "Created successfully"
+                        "description": "Class created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClassResource"
+                                }
+                            }
+                        }
                     },
                     "422": {
                         "description": "Validation error"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/class/{id}": {
+            "get": {
+                "tags": [
+                    "Class"
+                ],
+                "summary": "Retrieve details of a class by ID",
+                "description": "Show details of a specific class",
+                "operationId": "9b0b334878f4e4cec8ef43295cee5271",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Class ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Class data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClassResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Class not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Class"
+                ],
+                "summary": "Update an existing class",
+                "description": "Update an existing class",
+                "operationId": "9deb9ad6a5ea6d48fac8576ba83247b7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Class ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Updated class data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ClassUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Class updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClassResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Class not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Class"
+                ],
+                "summary": "Delete a class by ID",
+                "description": "Delete a specific class",
+                "operationId": "e5dd5ccb4dc95672787ba5ae39977710",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Class ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Class deleted successfully"
+                    },
+                    "404": {
+                        "description": "Class not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/classroom": {
+            "get": {
+                "tags": [
+                    "Classroom"
+                ],
+                "summary": "List classroom with pagination",
+                "description": "Get paginated list of classrooms",
+                "operationId": "472eeda86ef0afa6039764c4fd5e38a0",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search term for filtering classroom",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    },
+                    {
+                        "name": "sort_column",
+                        "in": "query",
+                        "description": "Column to sort by",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "id"
+                        }
+                    },
+                    {
+                        "name": "sort_direction",
+                        "in": "query",
+                        "description": "Direction for sorting (asc or desc)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "asc",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of classroom",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ClassroomResource"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Classroom"
+                ],
+                "summary": "Create a new classroom",
+                "description": "Create a new classroom",
+                "operationId": "65183e8f1c2096a1f2830994fd75c836",
+                "requestBody": {
+                    "description": "JSON object containing new classroom data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ClassroomStoreRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Classroom created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClassroomResource"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/classroom/{id}": {
+            "get": {
+                "tags": [
+                    "Classroom"
+                ],
+                "summary": "Retrieve details of a classroom by ID",
+                "description": "Show details of a specific classroom",
+                "operationId": "56a9ed9dbf934635736fdc41d569c683",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Classroom ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Classroom data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClassroomResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Classroom not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Classroom"
+                ],
+                "summary": "Update an existing classroom",
+                "description": "Update an existing classroom",
+                "operationId": "ec538d0ba37774dd80aafffab975a369",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Classroom ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Updated classroom data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ClassroomUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Classroom updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClassroomResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Classroom not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Classroom"
+                ],
+                "summary": "Delete a classroom by ID",
+                "description": "Delete a specific classroom",
+                "operationId": "aeda283cd8fa6de4b557f724bc0ffb85",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Classroom ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Classroom deleted successfully"
+                    },
+                    "404": {
+                        "description": "Classroom not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/discipline": {
+            "get": {
+                "tags": [
+                    "Discipline"
+                ],
+                "summary": "List Discipline with pagination",
+                "description": "Get paginated list of Disciplines",
+                "operationId": "f9e64f2cef5fc74312edd7855b6e70c0",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search term for filtering discipline",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    },
+                    {
+                        "name": "sort_column",
+                        "in": "query",
+                        "description": "Column to sort by",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "id"
+                        }
+                    },
+                    {
+                        "name": "sort_direction",
+                        "in": "query",
+                        "description": "Direction for sorting (asc or desc)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "asc",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of discipline",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/DisciplineResource"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Discipline"
+                ],
+                "summary": "Create a new Discipline",
+                "description": "Create a new Discipline",
+                "operationId": "f479d86e8eb7c69bf159aa22476c4c78",
+                "requestBody": {
+                    "description": "JSON object containing new Discipline data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DisciplineStoreRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Discipline created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DisciplineResource"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/discipline/{id}": {
+            "get": {
+                "tags": [
+                    "Discipline"
+                ],
+                "summary": "Retrieve details of a Discipline by ID",
+                "description": "Show details of a specific Discipline",
+                "operationId": "73f31bb24c004159b09f6abb0e0b37ff",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Discipline ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Discipline data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DisciplineResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Discipline not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Discipline"
+                ],
+                "summary": "Update an existing Discipline",
+                "description": "Update an existing Discipline",
+                "operationId": "a80635bff57c8dcfb3fcb98d3e9249ac",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Discipline ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Updated Discipline data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DisciplineUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Discipline updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DisciplineResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Discipline not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Discipline"
+                ],
+                "summary": "Delete a Discipline by ID",
+                "description": "Delete a specific Discipline",
+                "operationId": "8b5de322372cf71684eb1034c23bdb4c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Discipline ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Discipline deleted successfully"
+                    },
+                    "404": {
+                        "description": "Discipline not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/schedule": {
+            "get": {
+                "tags": [
+                    "Schedule"
+                ],
+                "summary": "List Schedule with pagination",
+                "description": "Get paginated list of Schedules",
+                "operationId": "770209026e4bbff78b8f3abeffa313f9",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search term for filtering schedule",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    },
+                    {
+                        "name": "sort_column",
+                        "in": "query",
+                        "description": "Column to sort by",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "id"
+                        }
+                    },
+                    {
+                        "name": "sort_direction",
+                        "in": "query",
+                        "description": "Direction for sorting (asc or desc)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "asc",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of schedule",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ScheduleResource"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Schedule"
+                ],
+                "summary": "Create a new Schedule",
+                "description": "Create a new Schedule",
+                "operationId": "e4e60c75570ca32c9fe2efda7d5d6858",
+                "requestBody": {
+                    "description": "JSON object containing new Schedule data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ScheduleStoreRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Schedule created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ScheduleResource"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/schedule/{id}": {
+            "get": {
+                "tags": [
+                    "Schedule"
+                ],
+                "summary": "Retrieve details of a Schedule by ID",
+                "description": "Show details of a specific Schedule",
+                "operationId": "02bf5dcbb2387d48b8b6958559a822b8",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Schedule ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Schedule data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ScheduleResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Schedule not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Schedule"
+                ],
+                "summary": "Update an existing Schedule",
+                "description": "Update an existing Schedule",
+                "operationId": "040d99ce796a94d3ab4dd77c5f8e3174",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Schedule ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Updated Schedule data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ScheduleUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Schedule updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ScheduleResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Schedule not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Schedule"
+                ],
+                "summary": "Delete a Schedule by ID",
+                "description": "Delete a specific Schedule",
+                "operationId": "34d2b2bb1d32572f1220338b5d2703f7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Schedule ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Schedule deleted successfully"
+                    },
+                    "404": {
+                        "description": "Schedule not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/schedules/class/{class_id}": {
+            "get": {
+                "tags": [
+                    "Schedule"
+                ],
+                "summary": "Get schedules by class ID",
+                "description": "Retrieve a list of schedules filtered by class ID",
+                "operationId": "0aded81945418f6caaa4a8bba31fa659",
+                "parameters": [
+                    {
+                        "name": "class_id",
+                        "in": "path",
+                        "description": "ID of the class",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of schedules for the class",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ScheduleResource"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/schedules/teacher/{teacher_id}": {
+            "get": {
+                "tags": [
+                    "Schedule"
+                ],
+                "summary": "Get schedules by teacher ID",
+                "description": "Retrieve a list of schedules filtered by teacher ID",
+                "operationId": "da0531b89df10243d238dc01ef35bcf8",
+                "parameters": [
+                    {
+                        "name": "teacher_id",
+                        "in": "path",
+                        "description": "ID of the teacher",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of schedules for the teacher",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ScheduleResource"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/schedules/discipline/{discipline_id}": {
+            "get": {
+                "tags": [
+                    "Schedule"
+                ],
+                "summary": "Get schedules by discipline ID",
+                "description": "Retrieve a list of schedules filtered by discipline ID",
+                "operationId": "8f69197f8762875dcab6828a02e7b96e",
+                "parameters": [
+                    {
+                        "name": "discipline_id",
+                        "in": "path",
+                        "description": "ID of the discipline",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of schedules for the discipline",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ScheduleResource"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/schedules/teacher/{teacher_id}/availability": {
+            "get": {
+                "tags": [
+                    "Schedule"
+                ],
+                "summary": "Check teacher availability",
+                "description": "Check if a teacher is available on a given day and time",
+                "operationId": "80b9b6ca240e82757c16639ea18fc81b",
+                "parameters": [
+                    {
+                        "name": "teacher_id",
+                        "in": "path",
+                        "description": "ID of the teacher",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "day",
+                        "in": "query",
+                        "description": "Day of the week",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "start_time",
+                        "in": "query",
+                        "description": "Start time of the schedule",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "time"
+                        }
+                    },
+                    {
+                        "name": "end_time",
+                        "in": "query",
+                        "description": "End time of the schedule",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "time"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Teacher is available",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Teacher is not available",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/schedules/day/{day}": {
+            "get": {
+                "tags": [
+                    "Schedule"
+                ],
+                "summary": "Get schedules by day",
+                "description": "Retrieve a list of schedules filtered by a specific day",
+                "operationId": "604f1ed71687a10cea4df61fb489c3ee",
+                "parameters": [
+                    {
+                        "name": "day",
+                        "in": "path",
+                        "description": "Day of the week",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of schedules for the day",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ScheduleResource"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/schedules/classroom/availability": {
+            "get": {
+                "tags": [
+                    "Schedule"
+                ],
+                "summary": "Check classroom availability",
+                "description": "Check if a classroom is available on a given day and time",
+                "operationId": "fab328e3565053ce283c9294b83a1a95",
+                "parameters": [
+                    {
+                        "name": "day",
+                        "in": "query",
+                        "description": "Day of the week",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "start_time",
+                        "in": "query",
+                        "description": "Start time of the schedule",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "time"
+                        }
+                    },
+                    {
+                        "name": "end_time",
+                        "in": "query",
+                        "description": "End time of the schedule",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "time"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Classroom is available",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Classroom is not available",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/schedules/class/{class_id}/weekly": {
+            "get": {
+                "tags": [
+                    "Schedule"
+                ],
+                "summary": "Get weekly schedule by class ID",
+                "description": "Retrieve the weekly schedule for a specific class",
+                "operationId": "cf1f687546715010810a48f2458ac15c",
+                "parameters": [
+                    {
+                        "name": "class_id",
+                        "in": "path",
+                        "description": "ID of the class",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Weekly schedule grouped by day",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ScheduleResource"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/school/register": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Register a new school and its admin user",
+                "description": "Creates a new school along with an admin user assigned to that school.",
+                "operationId": "registerSchool",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SchoolRegistrationRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "School and admin user registered successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "School and admin user registered successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Registration failed. Please try again.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Registration failed. Please try again."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/students/trashed": {
+            "get": {
+                "tags": [
+                    "Students"
+                ],
+                "summary": "Retrieve trashed students",
+                "operationId": "0ded9576fec5ce33f1954805589662df",
+                "responses": {
+                    "200": {
+                        "description": "List of trashed students retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
                     },
                     "500": {
                         "description": "Server error"
@@ -91,92 +1514,183 @@
                 }
             }
         },
-        "/{resource}/{id}": {
-            "get": {
+        "/api/students/restore/{id}": {
+            "post": {
                 "tags": [
-                    "CRUD Operations"
+                    "Students"
                 ],
-                "summary": "Get specific record",
-                "operationId": "519d648cefff8bfab7be8e5966ba7dd5",
+                "summary": "Restore a trashed student",
+                "operationId": "5573d1826ea907ac4857d8c2396739b0",
                 "parameters": [
-                    {
-                        "name": "resource",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "name": "id",
                         "in": "path",
-                        "required": true
+                        "description": "ID of the trashed student to restore",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success"
+                        "description": "Student restored successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
                     },
                     "404": {
-                        "description": "Not found"
+                        "description": "Student not found"
+                    },
+                    "500": {
+                        "description": "Server error"
                     }
                 }
-            },
+            }
+        },
+        "/api/students": {
+            "post": {
+                "tags": [
+                    "Students"
+                ],
+                "summary": "Create a new student",
+                "operationId": "7557a7a6219fedc4bb6a2bd4a09978db",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StudentStoreRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Student created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error creating student"
+                    }
+                }
+            }
+        },
+        "/api/students/{id}": {
             "put": {
                 "tags": [
-                    "CRUD Operations"
+                    "Students"
                 ],
-                "summary": "Update record",
-                "operationId": "5d20cccfdaef80de8ea9057636aab281",
+                "summary": "Update an existing student",
+                "operationId": "ab4663f1b3d03e5867d9dce3e8fa14a3",
                 "parameters": [
-                    {
-                        "name": "resource",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "name": "id",
                         "in": "path",
-                        "required": true
+                        "description": "ID of the student to update",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 ],
                 "requestBody": {
-                    "description": "Request body generated from updateValidationRules",
-                    "required": true
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StudentStoreRequest"
+                            }
+                        }
+                    }
                 },
                 "responses": {
                     "200": {
-                        "description": "Updated successfully"
+                        "description": "Student updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
                     },
-                    "404": {
-                        "description": "Not found"
-                    },
-                    "422": {
-                        "description": "Validation error"
+                    "500": {
+                        "description": "Error updating student"
                     }
                 }
-            },
-            "delete": {
+            }
+        },
+        "/api/students/{student_id}/enrollments": {
+            "get": {
                 "tags": [
-                    "CRUD Operations"
+                    "Students"
                 ],
-                "summary": "Delete record",
-                "operationId": "81b4e22748c872c38075b158ac97c98d",
+                "summary": "Retrieve student's enrollment history",
+                "operationId": "8ff333e6985146ab05f65c2466acbc9e",
                 "parameters": [
                     {
-                        "name": "resource",
+                        "name": "student_id",
                         "in": "path",
-                        "required": true
-                    },
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true
+                        "description": "ID of the student",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Deleted successfully"
+                        "description": "Student enrollments retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {}
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/students/{student_id}/enrollments/{enrollment_id}": {
+            "delete": {
+                "tags": [
+                    "Students"
+                ],
+                "summary": "Cancel an enrollment",
+                "operationId": "b5029c9555558d68ee9dd23eb3478be9",
+                "parameters": [
+                    {
+                        "name": "student_id",
+                        "in": "path",
+                        "description": "ID of the student",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "enrollment_id",
+                        "in": "path",
+                        "description": "ID of the enrollment to cancel",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Enrollment canceled successfully"
                     },
                     "404": {
-                        "description": "Not found"
+                        "description": "Enrollment not found"
                     }
                 }
             }
@@ -184,57 +1698,670 @@
     },
     "components": {
         "schemas": {
-            "LevelStoreRequest": {
-                "description": "Level creation request",
+            "EnrollmentRequest": {
+                "required": [
+                    "student_id",
+                    "class_id",
+                    "academic_year"
+                ],
+                "properties": {
+                    "student_id": {
+                        "type": "string"
+                    },
+                    "class_id": {
+                        "type": "string"
+                    },
+                    "academic_year": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "EnrollmentStatusRequest": {
+                "required": [
+                    "status_academic"
+                ],
+                "properties": {
+                    "status_academic": {
+                        "type": "string",
+                        "example": "promoted, repeated, transferred"
+                    }
+                },
+                "type": "object"
+            },
+            "StudentProgressRequest": {
+                "required": [
+                    "student_id",
+                    "academic_year"
+                ],
+                "properties": {
+                    "student_id": {
+                        "type": "string"
+                    },
+                    "next_class_id": {
+                        "type": "string"
+                    },
+                    "academic_year": {
+                        "type": "string"
+                    },
+                    "progress_status": {
+                        "type": "string",
+                        "example": "promoted, repeated, transferred"
+                    }
+                },
+                "type": "object"
+            },
+            "TransferRequest": {
+                "required": [
+                    "new_class_id",
+                    "current_academic_year"
+                ],
+                "properties": {
+                    "new_class_id": {
+                        "type": "string"
+                    },
+                    "current_academic_year": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "ClassStoreRequest": {
+                "required": [
+                    "name",
+                    "level_id"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "course_id": {
+                        "type": "integer"
+                    },
+                    "level_id": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "ClassUpdateRequest": {
+                "required": [
+                    "name",
+                    "level_id"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "course_id": {
+                        "type": "integer"
+                    },
+                    "level_id": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "ClassroomStoreRequest": {
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "capacity": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "ClassroomUpdateRequest": {
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "capacity": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "DisciplineStoreRequest": {
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "DisciplineUpdateRequest": {
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "ScheduleStoreRequest": {
+                "required": [
+                    "teacher_id",
+                    "class_id",
+                    "discipline_id",
+                    "classroom_id",
+                    "day",
+                    "start_time",
+                    "end_time"
+                ],
+                "properties": {
+                    "teacher_id": {
+                        "description": "ID of the teacher, must exist in the teachers table",
+                        "type": "integer"
+                    },
+                    "class_id": {
+                        "description": "ID of the class, must exist in the classes table",
+                        "type": "integer"
+                    },
+                    "discipline_id": {
+                        "description": "ID of the discipline, must exist in the disciplines table",
+                        "type": "integer"
+                    },
+                    "classroom_id": {
+                        "description": "ID of the classroom, must exist in the classrooms table",
+                        "type": "integer"
+                    },
+                    "day": {
+                        "description": "Day of the schedule, must be one of Monday, Tuesday, Wednesday, Thursday, Friday, or Saturday",
+                        "type": "string",
+                        "enum": [
+                            "Monday",
+                            "Tuesday",
+                            "Wednesday",
+                            "Thursday",
+                            "Friday",
+                            "Saturday"
+                        ]
+                    },
+                    "start_time": {
+                        "description": "Start time of the schedule in HH:MM format",
+                        "type": "string",
+                        "format": "time"
+                    },
+                    "end_time": {
+                        "description": "End time of the schedule in HH:MM format, must be after the start time",
+                        "type": "string",
+                        "format": "time"
+                    }
+                },
+                "type": "object"
+            },
+            "ScheduleUpdateRequest": {
+                "required": [
+                    "teacher_id",
+                    "class_id",
+                    "discipline_id",
+                    "classroom_id",
+                    "day",
+                    "start_time",
+                    "end_time"
+                ],
+                "properties": {
+                    "teacher_id": {
+                        "description": "ID of the teacher, must exist in the teachers table",
+                        "type": "integer"
+                    },
+                    "class_id": {
+                        "description": "ID of the class, must exist in the classes table",
+                        "type": "integer"
+                    },
+                    "discipline_id": {
+                        "description": "ID of the discipline, must exist in the disciplines table",
+                        "type": "integer"
+                    },
+                    "classroom_id": {
+                        "description": "ID of the classroom, must exist in the classrooms table",
+                        "type": "integer"
+                    },
+                    "day": {
+                        "description": "Day of the schedule, must be one of Monday, Tuesday, Wednesday, Thursday, Friday, or Saturday",
+                        "type": "string",
+                        "enum": [
+                            "Monday",
+                            "Tuesday",
+                            "Wednesday",
+                            "Thursday",
+                            "Friday",
+                            "Saturday"
+                        ]
+                    },
+                    "start_time": {
+                        "description": "Start time of the schedule in HH:MM format",
+                        "type": "string",
+                        "format": "time"
+                    },
+                    "end_time": {
+                        "description": "End time of the schedule in HH:MM format, must be after the start time",
+                        "type": "string",
+                        "format": "time"
+                    }
+                },
+                "type": "object"
+            },
+            "SchoolRegistrationRequest": {
+                "required": [
+                    "type_education_id",
+                    "school_name",
+                    "email",
+                    "first_name",
+                    "last_name",
+                    "password",
+                    "phone",
+                    "address"
+                ],
+                "properties": {
+                    "type_education_id": {
+                        "description": "ID for the type of education",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "school_name": {
+                        "description": "Name of the school",
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Bright Future School"
+                    },
+                    "email": {
+                        "description": "Email for the school",
+                        "type": "string",
+                        "format": "email",
+                        "example": "school@example.com"
+                    },
+                    "first_name": {
+                        "description": "First name of the school admin",
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "John"
+                    },
+                    "last_name": {
+                        "description": "Last name of the school admin",
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Doe"
+                    },
+                    "password": {
+                        "description": "Password for the school admin account",
+                        "type": "string",
+                        "format": "password",
+                        "minLength": 8,
+                        "example": "strongPassword123"
+                    },
+                    "phone": {
+                        "description": "Phone number for the school admin",
+                        "type": "string",
+                        "maxLength": 20,
+                        "example": "+123456789"
+                    },
+                    "address": {
+                        "description": "School address",
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "123 Main St"
+                    },
+                    "city": {
+                        "description": "City of the school",
+                        "type": "string",
+                        "maxLength": 100,
+                        "example": "Metropolis"
+                    },
+                    "state": {
+                        "description": "State of the school",
+                        "type": "string",
+                        "maxLength": 100,
+                        "example": "StateName"
+                    },
+                    "country": {
+                        "description": "Country of the school",
+                        "type": "string",
+                        "maxLength": 100,
+                        "example": "CountryName"
+                    },
+                    "postal_code": {
+                        "description": "Postal code of the school",
+                        "type": "string",
+                        "maxLength": 20,
+                        "example": "12345"
+                    },
+                    "website": {
+                        "description": "School's website URL",
+                        "type": "string",
+                        "format": "url",
+                        "maxLength": 255,
+                        "example": "http://schoolwebsite.com"
+                    },
+                    "founded_year": {
+                        "description": "Year the school was founded",
+                        "type": "integer",
+                        "minimum": 1800,
+                        "example": 1999
+                    },
+                    "registration_number": {
+                        "description": "Registration number of the school",
+                        "type": "string",
+                        "maxLength": 100,
+                        "example": "REG123456"
+                    }
+                },
+                "type": "object"
+            },
+            "StudentStoreRequest": {
+                "required": [
+                    "school_id",
+                    "first_name",
+                    "last_name",
+                    "email",
+                    "phone",
+                    "password",
+                    "birth_date"
+                ],
+                "properties": {
+                    "school_id": {
+                        "description": "Unique identifier for the school",
+                        "type": "string",
+                        "example": "123e4567-e89b-12d3-a456-426614174000"
+                    },
+                    "first_name": {
+                        "description": "First name of the student",
+                        "type": "string",
+                        "example": "John"
+                    },
+                    "last_name": {
+                        "description": "Last name of the student",
+                        "type": "string",
+                        "example": "Doe"
+                    },
+                    "email": {
+                        "description": "Unique email address of the student",
+                        "type": "string",
+                        "format": "email",
+                        "example": "john.doe@example.com"
+                    },
+                    "phone": {
+                        "description": "Unique phone number of the student",
+                        "type": "string",
+                        "example": "+1234567890"
+                    },
+                    "profile_picture_path": {
+                        "description": "Profile picture of the student, allowed formats: jpg, jpeg, png, max size: 2048 KB",
+                        "type": "string",
+                        "format": "binary",
+                        "nullable": true
+                    },
+                    "status": {
+                        "description": "Status of the student account, active (true) or inactive (false)",
+                        "type": "boolean",
+                        "example": true,
+                        "nullable": true
+                    },
+                    "password": {
+                        "description": "Password for the student, must contain at least 6 characters, including upper and lower case letters, a digit, and a special character",
+                        "type": "string",
+                        "example": "Password@123"
+                    },
+                    "case_number": {
+                        "description": "Optional case number associated with the student",
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "CN2023-0001",
+                        "nullable": true
+                    },
+                    "address": {
+                        "description": "Residential address of the student",
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "123 Main St, Springfield",
+                        "nullable": true
+                    },
+                    "observation": {
+                        "description": "Additional observations or notes regarding the student",
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Needs extra help in math",
+                        "nullable": true
+                    },
+                    "birth_date": {
+                        "description": "Birth date of the student",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2005-08-15"
+                    }
+                },
+                "type": "object"
+            },
+            "ClassResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "course_id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "level_name": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "ClassroomResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "capacity": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "DisciplineResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "ScheduleResource": {
+                "properties": {
+                    "id": {
+                        "description": "ID of the schedule",
+                        "type": "integer"
+                    },
+                    "class_id": {
+                        "description": "ID of the class",
+                        "type": "integer"
+                    },
+                    "class_name": {
+                        "description": "Name of the class",
+                        "type": "string"
+                    },
+                    "discipline_id": {
+                        "description": "ID of the discipline",
+                        "type": "integer"
+                    },
+                    "discipline_name": {
+                        "description": "Name of the discipline",
+                        "type": "string"
+                    },
+                    "teacher_id": {
+                        "description": "ID of the teacher",
+                        "type": "integer"
+                    },
+                    "teacher_first_name": {
+                        "description": "First name of the teacher",
+                        "type": "string"
+                    },
+                    "teacher_last_name": {
+                        "description": "Last name of the teacher",
+                        "type": "string"
+                    },
+                    "teacher_email": {
+                        "description": "Email of the teacher",
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "teacher_phone": {
+                        "description": "Phone number of the teacher",
+                        "type": "string"
+                    },
+                    "teacher_profile_picture_path": {
+                        "description": "Path to the teacher's profile picture",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "classroom_id": {
+                        "description": "ID of the classroom",
+                        "type": "integer"
+                    },
+                    "classroom_name": {
+                        "description": "Name of the classroom",
+                        "type": "string"
+                    },
+                    "day": {
+                        "description": "Day of the schedule",
+                        "type": "string"
+                    },
+                    "start_time": {
+                        "description": "Start time of the schedule",
+                        "type": "string",
+                        "format": "time"
+                    },
+                    "end_time": {
+                        "description": "End time of the schedule",
+                        "type": "string",
+                        "format": "time"
+                    }
+                },
+                "type": "object"
+            },
+            "Level": {
                 "required": [
                     "name",
                     "type_education_id",
                     "year"
                 ],
                 "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
                     "name": {
-                        "description": "Level name",
                         "type": "string",
-                        "maxLength": 255
+                        "example": "1º Classe"
                     },
                     "type_education_id": {
-                        "description": "Type of education ID",
-                        "type": "string"
+                        "type": "integer",
+                        "example": 1
                     },
                     "year": {
-                        "description": "Year of the level",
                         "type": "integer",
-                        "minimum": 1
+                        "example": 2024
                     }
                 },
                 "type": "object"
             },
-            "LevelUpdateRequest": {
-                "description": "Level update request",
+            "User": {
+                "title": "User",
+                "description": "User data response",
                 "properties": {
-                    "name": {
-                        "description": "Level name",
-                        "type": "string",
-                        "maxLength": 255
+                    "id": {
+                        "type": "integer",
+                        "example": 1
                     },
-                    "type_education_id": {
-                        "description": "Type of education ID",
+                    "first_name": {
+                        "type": "string",
+                        "example": "John"
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "example": "Doe"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "johndoe@example.com"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "987654321"
+                    },
+                    "profile_picture_path": {
                         "type": "string"
                     },
-                    "year": {
-                        "description": "Year of the level",
-                        "type": "integer",
-                        "minimum": 1
+                    "status": {
+                        "type": "string",
+                        "example": "active"
                     }
                 },
                 "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "sanctum": {
+                "type": "apiKey",
+                "description": "Enter token in format (Bearer <token>)",
+                "name": "Authorization",
+                "in": "header"
             }
         }
     },
     "tags": [
         {
-            "name": "CRUD Operations",
-            "description": "CRUD Operations"
+            "name": "Auth",
+            "description": "API Endpoints for Authentication"
+        },
+        {
+            "name": "Class",
+            "description": "API Endpoints for Class"
+        },
+        {
+            "name": "Classroom",
+            "description": "API Endpoints for Classroom"
+        },
+        {
+            "name": "Discipline",
+            "description": "API Endpoints for Discipline"
+        },
+        {
+            "name": "Schedule",
+            "description": "API Endpoints for Schedule"
+        },
+        {
+            "name": "Students",
+            "description": "API Endpoints for Students"
         }
     ]
 }

@@ -13,8 +13,44 @@ use App\Mail\SchoolRegistrationConfirmation;
 use App\Models\Role;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @OA\Tag(
+ *     name="School Registration",
+ *     description="Endpoints for registering a school and admin user"
+ * )
+ */
 class SchoolRegistrationController extends Controller
 {
+    /**
+     * Register a new school along with an admin user.
+     * 
+     * @OA\Post(
+     *     path="/school/register",
+     *     tags={"Auth"},
+     *     summary="Register a new school and its admin user",
+     *     description="Creates a new school along with an admin user assigned to that school.",
+     *     operationId="registerSchool",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/SchoolRegistrationRequest")
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="School and admin user registered successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="School and admin user registered successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Registration failed. Please try again.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="error", type="string", example="Registration failed. Please try again.")
+     *         )
+     *     )
+     * )
+     */
     public function register(SchoolRegistrationRequest $request)
     {
         DB::beginTransaction();
