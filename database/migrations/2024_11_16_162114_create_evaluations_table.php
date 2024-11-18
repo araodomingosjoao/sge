@@ -11,22 +11,27 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('school_calendars', function (Blueprint $table) {
+        Schema::create('evaluations', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('school_id')->constrained('schools');
-            $table->string('event_name');
+            $table->foreignUuid('class_id')->constrained('classes');
+            $table->foreignUuid('discipline_id')->constrained('disciplines');
+            $table->foreignUuid('trimester_id')->constrained('trimesters');
+            $table->unsignedBigInteger('test_type_id')->constrained('test_types');
+            $table->string('title');
+            $table->date('evaluation_date');
+            $table->decimal('max_grade', 5, 2);
             $table->text('description')->nullable();
-            $table->enum('event_type', ['class_period', 'holiday', 'exam_period', 'break', 'other']);
             $table->timestamps();
             $table->softDeletes();
         });
-    }
+            }
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('school_calendars');
+        Schema::dropIfExists('evaluations');
     }
 };

@@ -13,8 +13,15 @@ return new class extends Migration
     {
         Schema::create('classrooms', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->foreignUuid('school_id')->constrained('schools');
             $table->string('name');
             $table->integer('capacity')->nullable();
+            $table->string('building')->nullable();
+            $table->string('floor')->nullable();
+            $table->enum('type', ['classroom', 'laboratory', 'library', 'other'])->default('classroom');
+            $table->text('resources')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

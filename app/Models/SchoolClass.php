@@ -12,13 +12,32 @@ class SchoolClass extends BaseModel
     use HasFactory, SoftDeletes, HasUuids;
 
     protected $table = "classes";
-    protected $fillable = ['course_id', 'level_id', 'name'];
+    
+    protected $fillable = [
+        'school_id',
+        'course_id',
+        'level_id',
+        'name',
+        'maximum_students',
+        'academic_year',
+        'shift',
+        'status'
+    ];
 
     protected $casts = [
         'id' => 'string',
+        'school_id' => 'string',
         'course_id' => 'string',
         'level_id' => 'string',
+        'maximum_students' => 'integer',
+        'academic_year' => 'integer',
+        'status' => 'integer'
     ];
+
+    public function school()
+    {
+        return $this->belongsTo(School::class);
+    }
 
     public function course()
     {

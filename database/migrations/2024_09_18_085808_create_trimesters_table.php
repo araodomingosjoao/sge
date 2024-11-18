@@ -13,8 +13,10 @@ return new class extends Migration
     {
         Schema::create('trimesters', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->foreignUuid('school_id')->constrained('schools');
             $table->string('name');
-            $table->date('academic_year');
+            $table->year('academic_year');
+            $table->integer('trimester_number');
             $table->timestamps();
             $table->softDeletes();
         });

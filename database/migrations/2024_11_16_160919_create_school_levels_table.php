@@ -11,15 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('school_calendars', function (Blueprint $table) {
+        Schema::create('school_levels', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('school_id')->constrained('schools');
-            $table->string('event_name');
-            $table->text('description')->nullable();
-            $table->enum('event_type', ['class_period', 'holiday', 'exam_period', 'break', 'other']);
+            $table->foreignUuid('level_id')->constrained('levels');
             $table->timestamps();
             $table->softDeletes();
         });
+        
     }
 
     /**
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('school_calendars');
+        Schema::dropIfExists('school_levels');
     }
 };

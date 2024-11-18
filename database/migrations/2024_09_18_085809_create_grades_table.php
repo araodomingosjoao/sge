@@ -14,10 +14,15 @@ return new class extends Migration
         Schema::create('grades', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('student_id');
+            $table->foreignUuid('class_id')->constrained('classes');
+            // $table->foreignUuid('evaluation_id')->nullable()->constrained('evaluations');
             $table->uuid('discipline_id');
             $table->uuid('trimester_id');
             $table->unsignedBigInteger('test_type_id');
             $table->decimal('grade', 5, 2);
+            $table->year('academic_year');
+            $table->text('observation')->nullable();
+            $table->enum('status', ['draft', 'published'])->default('draft');
             $table->timestamps();
             $table->softDeletes();
     

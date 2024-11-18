@@ -31,7 +31,9 @@ class School extends Model
 
     protected $casts = [
         'id' => 'string',
-        'type_education_id' => 'string',
+        'type_education_id' => 'integer',
+        'founded_year' => 'integer',
+        'status' => 'integer',
     ];
 
     public static function getFileFields(): array
@@ -53,5 +55,46 @@ class School extends Model
     public function users()
     {
         return $this->hasMany(User::class, 'school_id');
+    }
+
+    public function disciplines()
+    {
+        return $this->belongsToMany(Discipline::class, 'school_disciplines')
+                    ->withTimestamps()
+                    ->withSoftDeletes();
+    }
+
+    public function courses()
+    {
+        return $this->belongsToMany(Course::class, 'school_courses')
+                    ->withTimestamps()
+                    ->withSoftDeletes();
+    }
+
+    public function levels()
+    {
+        return $this->belongsToMany(Level::class, 'school_levels')
+                    ->withTimestamps()
+                    ->withSoftDeletes();
+    }
+
+    public function classes()
+    {
+        return $this->hasMany(SchoolClass::class);
+    }
+
+    public function classrooms()
+    {
+        return $this->hasMany(Classroom::class);
+    }
+
+    public function calendars()
+    {
+        return $this->hasMany(SchoolCalendar::class);
+    }
+
+    public function trimesters()
+    {
+        return $this->hasMany(Trimester::class);
     }
 }

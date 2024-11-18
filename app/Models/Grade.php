@@ -10,15 +10,30 @@ class Grade extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['student_id', 'discipline_id', 'trimestre_id', 'type_test_id', 'grade'];
+    protected $fillable = [
+        'student_id',
+        'class_id',
+        'discipline_id',
+        'trimester_id',
+        'test_type_id',
+        'evaluation_id',
+        'grade',
+        'academic_year',
+        'observation',
+        'status'
+    ];
 
     protected $casts = [
         'id' => 'string',
         'student_id' => 'string',
+        'class_id' => 'string',
         'discipline_id' => 'string',
-        'trimestre_id' => 'string',
-        'type_test_id' => 'string',
-        'grade' => 'float',
+        'trimester_id' => 'string',
+        'evaluation_id' => 'string',
+        'test_type_id' => 'integer',
+        'grade' => 'decimal:2',
+        'academic_year' => 'integer',
+        'status' => 'string'
     ];
 
     public function student()
@@ -39,5 +54,15 @@ class Grade extends Model
     public function testType()
     {
         return $this->belongsTo(TestType::class, 'test_type_id');
+    }
+
+    public function evaluation()
+    {
+        return $this->belongsTo(Evaluation::class);
+    }
+
+    public function class()
+    {
+        return $this->belongsTo(SchoolClass::class, 'class_id');
     }
 }

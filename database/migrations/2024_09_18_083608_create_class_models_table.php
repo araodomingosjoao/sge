@@ -13,9 +13,13 @@ return new class extends Migration
     {
         Schema::create('classes', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->foreignUuid('school_id')->constrained('schools')->cascadeOnDelete();
             $table->uuid('course_id')->nullable();
             $table->uuid('level_id');
             $table->string('name');
+            $table->integer('maximum_students')->nullable();
+            $table->year('academic_year');
+            $table->enum('shift', ['morning', 'afternoon', 'evening'])->nullable();
             $table->timestamps();
             $table->softDeletes();
     
