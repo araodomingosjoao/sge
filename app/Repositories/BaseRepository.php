@@ -11,6 +11,8 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class BaseRepository implements RepositoryInterface
 {
@@ -39,7 +41,7 @@ class BaseRepository implements RepositoryInterface
     {
         try {
             $data = event(new BeforeCreate($data, $this->model));
-            $data = $data[count($data)-1];
+            $data = $data[count($data) - 1];
             $model = $this->model->create($data);
             event(new AfterCreate($model));
             return $model;
@@ -56,7 +58,7 @@ class BaseRepository implements RepositoryInterface
      */
     public function find(int|string $id): ?Model
     {
-        return $this->model->with($this->relationships)->find($id);
+        return $this->applyDefaultFilters($this->model->with($this->relationships))->find($id);
     }
 
     /**
@@ -68,11 +70,11 @@ class BaseRepository implements RepositoryInterface
      */
     public function update(int|string $id, array $data): Model|bool
     {
-        $record = $this->model->find($id);
+        $record = $this->applyDefaultFilters($this->model->with($this->relationships))->find($id);
         if ($record) {
             try {
                 $data = event(new BeforeUpdate($data, $record));
-                $data = $data[count($data)-1];
+                $data = $data[count($data) - 1];
                 $updated = $record->update($data);
                 if ($updated) {
                     event(new AfterUpdate($record));
@@ -93,7 +95,7 @@ class BaseRepository implements RepositoryInterface
      */
     public function delete(int|string $id): bool
     {
-        $record = $this->model->find($id);
+        $record = $this->applyDefaultFilters($this->model->with($this->relationships))->find($id);
         if ($record) {
             try {
                 return $record->delete();
@@ -116,8 +118,8 @@ class BaseRepository implements RepositoryInterface
      */
     public function paginateWithFiltersAndSort($filters = [], $search = '', $perPage = 15, $sortColumn = 'id', $sortDirection = 'asc'): LengthAwarePaginator
     {
-        $query = $this->model->newQuery();
-
+        $query = $this->applyDefaultFilters($this->model->newQuery());
+        Log::info('teste', [$this->model->newQuery()]);
         foreach ($filters as $key => $value) {
             if ($value) {
                 if ($key === 'start_date' || $key === 'end_date') {
@@ -145,7 +147,22 @@ class BaseRepository implements RepositoryInterface
         }
 
         return $query->with($this->relationships)
-                ->orderBy($sortColumn, $sortDirection)
-                ->paginate($perPage);
+            ->orderBy($sortColumn, $sortDirection)
+            ->paginate($perPage);
+    }
+
+    /**
+     * Aplica automaticamente filtros padrão, como o school_id do usuário autenticado.
+     *
+     * @param Builder $query
+     * @return Builder
+     */
+    protected function applyDefaultFilters(Builder $query): Builder
+    {
+        $user = Auth::user();
+        if ($user && $user->school_id) {
+            $query->where('school_id', $user->school_id);
+        }
+        return $query;
     }
 }

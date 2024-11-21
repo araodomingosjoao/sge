@@ -22,4 +22,9 @@ class TypeEducation extends Model
     {
         return $this->hasMany(School::class, 'type_education_id');
     }
+
+    public function levels()
+    {
+        return $this->hasMany(Level::class, 'type_education_id', 'id');
+    }
 }

@@ -27,11 +27,13 @@ class School extends Model
         'founded_year',
         'registration_number',
         'status',
+        'category_id'
     ];
 
     protected $casts = [
         'id' => 'string',
         'type_education_id' => 'integer',
+        'category_id' => 'integer',
         'founded_year' => 'integer',
         'status' => 'integer',
     ];
@@ -45,6 +47,11 @@ class School extends Model
                     'fileName' => fn ($file) => Str::random(40) . '.' . $file->getClientOriginalExtension(),
                 ]
             ];
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'category_id', 'id');
     }
 
     public function typeEducation()
@@ -76,6 +83,16 @@ class School extends Model
         return $this->belongsToMany(Level::class, 'school_levels')
                     ->withTimestamps()
                     ->withSoftDeletes();
+    }
+
+    public function levelDisciplines()
+    {
+        return $this->hasMany(SchoolLevelDiscipline::class);
+    }
+
+    public function courseDisciplines()
+    {
+        return $this->hasMany(SchoolCourseDiscipline::class);
     }
 
     public function classes()

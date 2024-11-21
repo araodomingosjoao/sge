@@ -884,6 +884,249 @@
                 ]
             }
         },
+        "/level": {
+            "get": {
+                "tags": [
+                    "Levels"
+                ],
+                "summary": "List levels with pagination",
+                "description": "Get paginated list of levels",
+                "operationId": "ffd86815d5774604d9a8ec1dc140364a",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search term for filtering levels",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    },
+                    {
+                        "name": "sort_column",
+                        "in": "query",
+                        "description": "Column to sort by",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "id"
+                        }
+                    },
+                    {
+                        "name": "sort_direction",
+                        "in": "query",
+                        "description": "Direction for sorting (asc or desc)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "asc",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of levels",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Level"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Levels"
+                ],
+                "summary": "Create a new level",
+                "description": "Create a new level",
+                "operationId": "dee22d180d6fed2705f7fa99036d2860",
+                "requestBody": {
+                    "description": "JSON object containing new level data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Level"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Level created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Level"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/level/{id}": {
+            "get": {
+                "tags": [
+                    "Levels"
+                ],
+                "summary": "Retrieve details of a level by ID",
+                "description": "Show details of a specific level",
+                "operationId": "4df19e23924d7042a0985b0eafea2b04",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Level ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Level data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Level"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Level not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Levels"
+                ],
+                "summary": "Update an existing level",
+                "description": "Update an existing level",
+                "operationId": "5fca90dd27998db4d197c30801953bb5",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Level ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Updated level data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Level"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Level updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Level"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Level not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Levels"
+                ],
+                "summary": "Delete a level by ID",
+                "description": "Delete a specific level",
+                "operationId": "1f390904d21d7a6e509a8df3862a27f8",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Level ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Level deleted successfully"
+                    },
+                    "404": {
+                        "description": "Level not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/schedule": {
             "get": {
                 "tags": [
@@ -1427,6 +1670,389 @@
                                     "items": {
                                         "$ref": "#/components/schemas/ScheduleResource"
                                     }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/schools/{school}/data": {
+            "get": {
+                "tags": [
+                    "Schools"
+                ],
+                "summary": "Lista disciplinas associadas a uma escola",
+                "description": "Recupera as disciplinas vinculadas a níveis e cursos de uma escola específica.",
+                "operationId": "getSchoolDisciplines",
+                "parameters": [
+                    {
+                        "name": "school",
+                        "in": "path",
+                        "description": "ID da escola",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Dados de disciplinas da escola",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "school_id": {
+                                            "type": "string",
+                                            "format": "uuid"
+                                        },
+                                        "type_education": {
+                                            "type": "string"
+                                        },
+                                        "levels": {
+                                            "type": "array",
+                                            "items": {}
+                                        },
+                                        "courses": {
+                                            "type": "array",
+                                            "items": {}
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Escola não encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Escola não encontrada."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/schools/{school}/levels/{level}/disciplines": {
+            "get": {
+                "tags": [
+                    "Schools"
+                ],
+                "summary": "Lista disciplinas de um nível específico",
+                "description": "Recupera disciplinas vinculadas a um nível específico dentro de uma escola.",
+                "operationId": "getLevelDisciplines",
+                "parameters": [
+                    {
+                        "name": "school",
+                        "in": "path",
+                        "description": "ID da escola",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "level",
+                        "in": "path",
+                        "description": "ID do nível",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Disciplinas encontradas"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Schools"
+                ],
+                "summary": "Adiciona uma disciplina a um nível",
+                "description": "Associa uma disciplina a um nível específico de uma escola.",
+                "operationId": "addLevelDiscipline",
+                "parameters": [
+                    {
+                        "name": "school",
+                        "in": "path",
+                        "description": "ID da escola",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "level",
+                        "in": "path",
+                        "description": "ID do nível",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "discipline_id"
+                                ],
+                                "properties": {
+                                    "discipline_id": {
+                                        "description": "ID da disciplina",
+                                        "type": "string",
+                                        "format": "uuid"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Disciplina associada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Disciplina associada com sucesso!"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erro de validação",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "O campo discipline_id é obrigatório."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/schools/{school}/levels/{level}/disciplines/{discipline}": {
+            "delete": {
+                "tags": [
+                    "Schools"
+                ],
+                "summary": "Remove uma disciplina de um nível",
+                "description": "Remove a associação de uma disciplina com um nível específico de uma escola.",
+                "operationId": "removeLevelDiscipline",
+                "parameters": [
+                    {
+                        "name": "school",
+                        "in": "path",
+                        "description": "ID da escola",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "level",
+                        "in": "path",
+                        "description": "ID do nível",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "discipline",
+                        "in": "path",
+                        "description": "ID da disciplina",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Disciplina removida com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Disciplina removida com sucesso!"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/schools/{school}/courses/{course}/disciplines": {
+            "post": {
+                "tags": [
+                    "Schools"
+                ],
+                "summary": "Adiciona uma disciplina a um curso",
+                "description": "Associa uma disciplina a um curso específico de uma escola.",
+                "operationId": "addCourseDiscipline",
+                "parameters": [
+                    {
+                        "name": "school",
+                        "in": "path",
+                        "description": "ID da escola",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "course",
+                        "in": "path",
+                        "description": "ID do curso",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "discipline_id"
+                                ],
+                                "properties": {
+                                    "discipline_id": {
+                                        "description": "ID da disciplina",
+                                        "type": "string",
+                                        "format": "uuid"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Disciplina associada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Disciplina associada com sucesso!"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/schools/{school}/courses/{course}/disciplines/{discipline}": {
+            "delete": {
+                "tags": [
+                    "Schools"
+                ],
+                "summary": "Remove uma disciplina de um curso",
+                "description": "Remove a associação de uma disciplina com um curso específico de uma escola.",
+                "operationId": "removeCourseDiscipline",
+                "parameters": [
+                    {
+                        "name": "school",
+                        "in": "path",
+                        "description": "ID da escola",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "course",
+                        "in": "path",
+                        "description": "ID do curso",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "discipline",
+                        "in": "path",
+                        "description": "ID da disciplina",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Disciplina removida com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Disciplina removida com sucesso!"
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
@@ -1993,6 +2619,39 @@
                 },
                 "type": "object"
             },
+            "LevelStoreRequest": {
+                "required": [
+                    "name",
+                    "type_education_id",
+                    "year"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "type_education_id": {
+                        "type": "integer"
+                    },
+                    "year": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "LevelUpdateRequest": {
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "type_education_id": {
+                        "type": "integer"
+                    },
+                    "year": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
             "ScheduleStoreRequest": {
                 "required": [
                     "teacher_id",
@@ -2111,6 +2770,11 @@
                 "properties": {
                     "type_education_id": {
                         "description": "ID for the type of education",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "category_id": {
+                        "description": "ID for the category",
                         "type": "integer",
                         "example": 1
                     },
@@ -2491,8 +3155,16 @@
             "description": "API Endpoints for Discipline"
         },
         {
+            "name": "Levels",
+            "description": "API Endpoints for Level Management"
+        },
+        {
             "name": "Schedule",
             "description": "API Endpoints for Schedule"
+        },
+        {
+            "name": "Schools",
+            "description": "API Endpoints for Schools"
         },
         {
             "name": "Students",

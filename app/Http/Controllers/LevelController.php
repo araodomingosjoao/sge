@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ApiResponse;
+use App\Http\Requests\LevelStoreRequest;
+use App\Http\Requests\LevelUpdateRequest;
 use App\Http\Resources\LevelResource;
 use App\Repositories\LevelRepository;
 use App\Traits\CrudTrait;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @OA\Tag(
@@ -15,26 +19,7 @@ use Illuminate\Http\Request;
  */
 class LevelController extends Controller
 {
-    use CrudTrait;
-
-    protected $storeValidationRules = [
-        'name' => 'required|string|max:255',
-        'type_education_id' => 'required|string|exists:type_educations,id',
-        'year' => 'required|numeric|unique:levels,year|min:1',
-    ];
-    
-    protected $updateValidationRules = [
-        'name' => 'sometimes|string|max:255',
-        'type_education_id' => 'sometimes|string|exists:type_educations,id',
-        'year' => 'sometimes|numeric|unique:levels,year|min:1',
-    ];
-    
-    protected $uniqueFields = [
-        'year' => 'levels'
-    ];
-
-    protected $resource = LevelResource::class;
-    protected $resourceDetails = LevelResource::class;
+    protected $repository;
 
     public function __construct(LevelRepository $repository)
     {
@@ -87,7 +72,23 @@ class LevelController extends Controller
      *     )
      * )
      */
-    
+    public function index(Request $request)
+    {
+        try {
+            $results = $this->repository->paginateWithFiltersAndSort(
+                $request->query('filters', []),
+                $request->query('search', ''),
+                $request->query('per_page', 15),
+                $request->query('sort_column', 'id'),
+                $request->query('sort_direction', 'asc')
+            );
+            return ApiResponse::success($results);
+            return ApiResponse::paginated($results, LevelResource::class);
+        } catch (\Exception $e) {
+            Log::error('Error fetching levels:', ['exception' => $e]);
+            return ApiResponse::error('Error fetching levels.', 500);
+        }
+    }
     /**
      * Create a new level
      * 
@@ -116,7 +117,16 @@ class LevelController extends Controller
      *     )
      * )
      */
-    
+    public function create(LevelStoreRequest $request)
+    {
+        try {
+            $level = $this->repository->create($request->validated());
+            return ApiResponse::success(LevelResource::make($level), 'Level created successfully', 201);
+        } catch (\Exception $e) {
+            Log::error('Error creating level: ', ['exception' => $e]);
+            return ApiResponse::error('Error creating level: ' . $e->getMessage(), 500);
+        }
+    }
     /**
      * Show details of a specific level
      *
@@ -143,7 +153,14 @@ class LevelController extends Controller
      *     )
      * )
      */
-    
+    public function read($id)
+    {
+        $level = $this->repository->find($id);
+        if ($level) {
+            return ApiResponse::success(LevelResource::make($level));
+        }
+        return ApiResponse::error('Level not found', 404);
+    }
      /**
      * Update an existing level
      * 
@@ -179,7 +196,19 @@ class LevelController extends Controller
      *     )
      * )
      */
-    
+    public function update(LevelUpdateRequest $request, $id)
+    {
+        try {
+            $success = $this->repository->update($id, $request->validated());
+            if ($success) {
+                return ApiResponse::success(LevelResource::make($success), 'Level updated successfully');
+            }
+            return ApiResponse::error('Level not found', 404);
+        } catch (\Exception $e) {
+            Log::error('Error updating level: ', ['exception' => $e]);
+            return ApiResponse::error('Error updating level: ' . $e->getMessage(), 500);
+        }
+    }
      /**
      * Delete a specific level
      * 
@@ -205,4 +234,17 @@ class LevelController extends Controller
      *     )
      * )
      */
+    public function delete($id)
+    {
+        try {
+            $success = $this->repository->delete($id);
+            if ($success) {
+                return ApiResponse::success(null, 'Level deleted successfully');
+            }
+            return ApiResponse::error('Level not found', 404);
+        } catch (\Exception $e) {
+            Log::error('Error deleting level: ', ['exception' => $e]);
+            return ApiResponse::error('Error deleting level: ' . $e->getMessage(), 500);
+        }
+    }
 }

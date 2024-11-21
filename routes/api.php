@@ -19,10 +19,16 @@ Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/school/register', [SchoolRegistrationController::class, 'register']);
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
-    Route::apiCrud('school', SchoolController::class, null, [
+    Route::apiCrud('schools', SchoolController::class, null, [
         'create' => 'role:admin_school',
         'delete' => 'role:admin_school' 
     ]);
+    Route::get('/schools/{school}/data', [SchoolController::class, 'index']);
+    Route::get('/schools/{school}/levels/{level}/disciplines', [SchoolController::class, 'getLevelDisciplines']);
+    Route::post('/schools/{school}/levels/{level}/disciplines', [SchoolController::class, 'addLevelDiscipline']);
+    Route::delete('/schools/{school}/levels/{level}/disciplines/{discipline}', [SchoolController::class, 'removeLevelDiscipline']);
+    Route::post('/schools/{school}/courses/{course}/disciplines', [SchoolController::class, 'addCourseDiscipline']);
+    Route::delete('/schools/{school}/courses/{course}/disciplines/{discipline}', [SchoolController::class, 'removeCourseDiscipline']);
     Route::get('/user/profile', [AuthController::class, 'profile']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::apiCrud('user', UserController::class);

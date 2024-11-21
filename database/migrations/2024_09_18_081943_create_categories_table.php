@@ -11,14 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('course_disciplines', function (Blueprint $table) {
-            $table->uuid('course_id');
-            $table->uuid('discipline_id');
+        Schema::create('categories', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('name');
             $table->timestamps();
             $table->softDeletes();
-    
-            $table->foreign('course_id')->references('id')->on('courses');
-            $table->foreign('discipline_id')->references('id')->on('disciplines');
         });
     }
 
@@ -27,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('course_disciplines');
+        Schema::dropIfExists('categories');
     }
 };

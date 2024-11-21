@@ -9,6 +9,7 @@ use Illuminate\Foundation\Http\FormRequest;
  *     schema="SchoolRegistrationRequest",
  *     required={"type_education_id", "school_name", "email", "first_name", "last_name", "password", "phone", "address"},
  *     @OA\Property(property="type_education_id", type="integer", example=1, description="ID for the type of education"),
+ *     @OA\Property(property="category_id", type="integer", example=1, description="ID for the category"),
  *     @OA\Property(property="school_name", type="string", maxLength=255, example="Bright Future School", description="Name of the school"),
  *     @OA\Property(property="email", type="string", format="email", example="school@example.com", description="Email for the school"),
  *     @OA\Property(property="first_name", type="string", maxLength=255, example="John", description="First name of the school admin"),
@@ -44,6 +45,7 @@ class SchoolRegistrationRequest extends FormRequest
     {
         return [
             'type_education_id' => 'required|numeric|exists:type_educations,id',
+            'category_id' => 'required_if:type_education_id,4|string|exists:categories,id',
             'school_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'first_name' => 'required|string|max:255',

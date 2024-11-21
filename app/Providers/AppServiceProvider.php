@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Listeners\BeforeCreateSubscriber;
 use App\Listeners\BeforeUpdateSubscriber;
+use App\Models\School;
+use App\Observers\SchoolObserver;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Event;
 
@@ -24,5 +26,6 @@ class AppServiceProvider extends ServiceProvider
     {
         Event::subscribe(BeforeCreateSubscriber::class);
         Event::subscribe(BeforeUpdateSubscriber::class);
+        School::observe(SchoolObserver::class);
     }
 }

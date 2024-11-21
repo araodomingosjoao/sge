@@ -26,4 +26,9 @@ class Level extends BaseModel
     {
         return $this->belongsTo(TypeEducation::class);
     }
+
+    public function disciplines()
+    {
+        return $this->belongsToMany(Discipline::class, 'level_discipline');
+    }
 }

@@ -17,22 +17,29 @@ class Discipline extends BaseModel
         'id' => 'string',
     ];
 
+    public function levels()
+    {
+        return $this->belongsToMany(Level::class, 'level_discipline', 'discipline_id', 'level_id')
+            ->withTimestamps();
+    }
+
     public function courses()
     {
-        return $this->belongsToMany(Course::class, 'course_disciplines');
+        return $this->belongsToMany(Course::class, 'course_discipline')
+            ->withTimestamps();
     }
 
     public function teachers()
     {
         return $this->belongsToMany(Teacher::class, 'teacher_discipline_class')
-                    ->withPivot('class_id')
-                    ->withTimestamps();
+            ->withPivot('class_id')
+            ->withTimestamps();
     }
 
     public function classes()
     {
         return $this->belongsToMany(SchoolClass::class, 'teacher_discipline_class')
-                    ->withPivot('teacher_id')
-                    ->withTimestamps();
+            ->withPivot('teacher_id')
+            ->withTimestamps();
     }
 }

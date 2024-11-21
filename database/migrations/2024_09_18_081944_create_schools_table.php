@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('schools', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->unsignedBigInteger('type_education_id');
+            $table->foreignUuid('category_id')->nullable()->constrained('categories')->cascadeOnDelete();
             $table->string('school_name');
             $table->string('logo_path')->nullable();
             $table->string('city')->nullable();

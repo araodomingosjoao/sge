@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('courses', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->foreignUuid('category_id')->constrained('categories')->cascadeOnDelete();
             $table->string('name');
             $table->timestamps();
             $table->softDeletes();
