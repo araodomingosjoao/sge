@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/school/register', [SchoolRegistrationController::class, 'register']);
+Route::get('/options', [SchoolController::class, 'options']);
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::apiCrud('schools', SchoolController::class, null, [

@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ApiResponse;
 use App\Models\AcademicYear;
 use App\Models\School;
+use App\Models\TypeEducation;
 use App\Repositories\SchoolRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -23,4 +25,24 @@ class SchoolController extends Controller
         $this->repository = $repository;
     }
 
+    /**
+     * @OA\Get(
+     *     path="/options",
+     *     summary="Listar todas as opções",
+     *     tags={"Schools"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Get all options successfully",
+     *         @OA\JsonContent(
+     *             
+     *         )
+     *     )
+     * )
+     */
+    public function options()
+    {
+        return ApiResponse::success([
+            'optionsTypeEducation' => TypeEducation::all()
+        ]);
+    }
 }

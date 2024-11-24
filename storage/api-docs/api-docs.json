@@ -2004,6 +2004,25 @@
                 ]
             }
         },
+        "/options": {
+            "get": {
+                "tags": [
+                    "Schools"
+                ],
+                "summary": "Listar todas as opções",
+                "operationId": "008018d5168b5407aafbd00d49b5e150",
+                "responses": {
+                    "200": {
+                        "description": "Get all options successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/school/register": {
             "post": {
                 "tags": [
@@ -3209,6 +3228,10 @@
         {
             "name": "Schedule",
             "description": "API Endpoints for Schedule"
+        },
+        {
+            "name": "Schools",
+            "description": "API Endpoints for Schools"
         },
         {
             "name": "Students",
