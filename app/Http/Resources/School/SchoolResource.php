@@ -16,10 +16,20 @@ class SchoolResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'category_id' => $this->category_id,
             'type_education_id' => $this->type_education_id,
             'school_name' => $this->school_name,
             'logo_path' => $this->logo_path,
-            'status' => $this->status,
+            'address' => $this->address,
+            'city' => $this->city,
+            'state' => $this->state,
+            'country' => $this->country,
+            'postal_code' => $this->postal_code,
+            'phone' => $this->phone,
+            'email' => $this->email,
+            'website' => $this->website,
+            'founded_year' => $this->founded_year,
+            'registration_number' => $this->registration_number
         ];
     }
 }

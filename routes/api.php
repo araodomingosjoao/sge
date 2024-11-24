@@ -30,6 +30,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::apiCrud('user', UserController::class);
     Route::apiCrud('level', LevelController::class);
     Route::apiCrud('teacher', TeacherController::class);
+    Route::get('/school/{id}', [SchoolController::class, 'read']);
+    Route::put('/school/{id}', [SchoolController::class, 'update']);
 
 
     Route::get('/disciplines', [DisciplineController::class, 'index']);

@@ -58,7 +58,7 @@ class BaseRepository implements RepositoryInterface
      */
     public function find(int|string $id): ?Model
     {
-        return $this->applyDefaultFilters($this->model->with($this->relationships))->find($id);
+        return $this->model->with($this->relationships)->find($id);
     }
 
     /**
@@ -70,7 +70,7 @@ class BaseRepository implements RepositoryInterface
      */
     public function update(int|string $id, array $data): Model|bool
     {
-        $record = $this->applyDefaultFilters($this->model->with($this->relationships))->find($id);
+        $record = $this->model->with($this->relationships)->find($id);
         if ($record) {
             try {
                 $data = event(new BeforeUpdate($data, $record));
@@ -95,7 +95,7 @@ class BaseRepository implements RepositoryInterface
      */
     public function delete(int|string $id): bool
     {
-        $record = $this->applyDefaultFilters($this->model->with($this->relationships))->find($id);
+        $record = $this->model->with($this->relationships)->find($id);
         if ($record) {
             try {
                 return $record->delete();
@@ -118,8 +118,8 @@ class BaseRepository implements RepositoryInterface
      */
     public function paginateWithFiltersAndSort($filters = [], $search = '', $perPage = 15, $sortColumn = 'id', $sortDirection = 'asc'): LengthAwarePaginator
     {
-        $query = $this->applyDefaultFilters($this->model->newQuery());
-        Log::info('teste', [$this->model->newQuery()]);
+        $query = $this->model->newQuery();
+        Log::inf('teste', [$this->model->newQuery()]);
         foreach ($filters as $key => $value) {
             if ($value) {
                 if ($key === 'start_date' || $key === 'end_date') {
