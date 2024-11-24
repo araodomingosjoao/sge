@@ -279,7 +279,7 @@ class ScheduleController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/schedules/class/{class_id}",
+     *     path="/api/schedule/class/{class_id}",
      *     summary="Get schedules by class ID",
      *     description="Retrieve a list of schedules filtered by class ID",
      *     tags={"Schedule"},
@@ -308,10 +308,11 @@ class ScheduleController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/schedules/teacher/{teacher_id}",
+     *     path="/api/schedule/teacher/{teacher_id}",
      *     summary="Get schedules by teacher ID",
      *     description="Retrieve a list of schedules filtered by teacher ID",
      *     tags={"Schedule"},
+     *     security={{ "sanctum": {} }},
      *     @OA\Parameter(
      *         name="teacher_id",
      *         in="path",
@@ -337,10 +338,11 @@ class ScheduleController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/schedules/discipline/{discipline_id}",
+     *     path="/api/schedule/discipline/{discipline_id}",
      *     summary="Get schedules by discipline ID",
      *     description="Retrieve a list of schedules filtered by discipline ID",
      *     tags={"Schedule"},
+     *     security={{ "sanctum": {} }},
      *     @OA\Parameter(
      *         name="discipline_id",
      *         in="path",
@@ -366,10 +368,11 @@ class ScheduleController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/schedules/teacher/{teacher_id}/availability",
+     *     path="/api/schedule/teacher/{teacher_id}/availability",
      *     summary="Check teacher availability",
      *     description="Check if a teacher is available on a given day and time",
      *     tags={"Schedule"},
+     *     security={{ "sanctum": {} }},
      *     @OA\Parameter(
      *         name="teacher_id",
      *         in="path",
@@ -432,10 +435,11 @@ class ScheduleController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/schedules/day/{day}",
+     *     path="/schedule/day/{day}",
      *     summary="Get schedules by day",
      *     description="Retrieve a list of schedules filtered by a specific day",
      *     tags={"Schedule"},
+     *     security={{ "sanctum": {} }},
      *     @OA\Parameter(
      *         name="day",
      *         in="path",
@@ -456,15 +460,16 @@ class ScheduleController extends Controller
                             ->where('day', $day)
                             ->get();
 
-        return response()->json(ScheduleResource::collection($schedules));
+        return response()->json($schedules);
     }
 
     /**
      * @OA\Get(
-     *     path="/api/schedules/classroom/availability",
+     *     path="/schedule/classroom/availability",
      *     summary="Check classroom availability",
      *     description="Check if a classroom is available on a given day and time",
      *     tags={"Schedule"},
+     *     security={{ "sanctum": {} }},
      *     @OA\Parameter(
      *         name="day",
      *         in="query",
@@ -519,16 +524,17 @@ class ScheduleController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/schedules/class/{class_id}/weekly",
+     *     path="/schedule/class/{class_id}/weekly",
      *     summary="Get weekly schedule by class ID",
      *     description="Retrieve the weekly schedule for a specific class",
      *     tags={"Schedule"},
+     *     security={{ "sanctum": {} }},
      *     @OA\Parameter(
      *         name="class_id",
      *         in="path",
      *         required=true,
      *         description="ID of the class",
-     *         @OA\Schema(type="integer")
+     *         @OA\Schema(type="string")
      *     ),
      *     @OA\Response(
      *         response=200,

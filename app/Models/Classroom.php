@@ -10,6 +10,7 @@ class Classroom extends BaseModel
     use HasFactory, HasUuids;
 
     protected $fillable = [
+        'school_id', 
         'name', 
         'capacity'
     ];

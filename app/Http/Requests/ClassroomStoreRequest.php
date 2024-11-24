@@ -31,6 +31,7 @@ class ClassroomStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'school_id' => 'required|string|exists:schools,id',
             'name' => 'required|string|max:255',
             'capacity' => 'nullable|numeric|min:1'
         ];

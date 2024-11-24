@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ApiResponse;
-use App\Http\Requests\DisciplineStoreRequest;
-use App\Http\Requests\DisciplineUpdateRequest;
-use App\Http\Resources\DisciplineResource;
+use App\Models\Course;
+use App\Models\Discipline;
+use App\Models\Level;
+use App\Models\SchoolCourseDiscipline;
+use App\Models\SchoolLevelDiscipline;
 use App\Repositories\DisciplineRepository;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * @OA\Tag(
@@ -26,225 +28,392 @@ class DisciplineController extends Controller
     }
 
     /**
-     * Get paginated list of Disciplines
-     * 
      * @OA\Get(
-     *     path="/discipline",
+     *     path="/disciplines",
+     *     summary="Lista disciplinas associadas a uma escola",
+     *     description="Recupera as disciplinas vinculadas a níveis e cursos de uma escola específica.",
      *     tags={"Discipline"},
-     *     summary="List Discipline with pagination",
      *     security={{ "sanctum": {} }},
-     *     @OA\Parameter(
-     *         name="search",
-     *         in="query",
-     *         description="Search term for filtering discipline",
-     *         required=false,
-     *         @OA\Schema(type="string")
-     *     ),
-     *     @OA\Parameter(
-     *         name="per_page",
-     *         in="query",
-     *         description="Number of items per page",
-     *         required=false,
-     *         @OA\Schema(type="integer", default=15)
-     *     ),
-     *     @OA\Parameter(
-     *         name="sort_column",
-     *         in="query",
-     *         description="Column to sort by",
-     *         required=false,
-     *         @OA\Schema(type="string", default="id")
-     *     ),
-     *     @OA\Parameter(
-     *         name="sort_direction",
-     *         in="query",
-     *         description="Direction for sorting (asc or desc)",
-     *         required=false,
-     *         @OA\Schema(type="string", enum={"asc","desc"}, default="asc")
-     *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="List of discipline",
+     *         description="Dados de disciplinas da escola",
      *         @OA\JsonContent(
-     *             type="array",
-     *             @OA\Items(ref="#/components/schemas/DisciplineResource")
+     *             @OA\Property(property="school_id", type="string", format="uuid"),
+     *             @OA\Property(property="type_education", type="string"),
+     *             @OA\Property(property="levels", type="array", @OA\Items()),
+     *             @OA\Property(property="courses", type="array", @OA\Items())
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Nenhuma escola associada ao usuário logado",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Nenhuma escola associada ao usuário logado.")
      *         )
      *     )
      * )
      */
-    public function index(Request $request)
+    public function index()
     {
-        try {
-            $results = $this->repository->paginateWithFiltersAndSort(
-                $request->query('filters', []),
-                $request->query('search', ''),
-                $request->query('per_page', 15),
-                $request->query('sort_column', 'id'),
-                $request->query('sort_direction', 'asc')
-            );
+        $school = Auth::user()->school;
 
-            return ApiResponse::paginated($results, DisciplineResource::class);
-        } catch (\Exception $e) {
-            Log::error('Error fetching Disciplines:', ['exception' => $e]);
-            return ApiResponse::error('Error fetching Disciplines.', 500);
+        if (!$school) {
+            return ApiResponse::error('Nenhuma escola associada ao usuário logado.', 404);
         }
+        // Definir os IDs do tipo de educação com base no tipo de educação da escola
+        $typeEducationIds = $school->type_education_id == 3
+            ? [1, 2]
+            : [$school->type_education_id];
+
+        // Carregar os níveis de educação filtrados pelo tipo de educação
+        $levels = Level::whereIn('type_education_id', $typeEducationIds)->get();
+
+        // Para Ensino Fundamental, use disciplinas gerais
+        if ($school->typeEducation->name == 'Ensino Fundamental') {
+            $mappedLevels = $levels->map(function ($level) {
+                return [
+                    'id' => $level->id,
+                    'name' => $level->name,
+                    'year' => $level->year,
+                    'disciplines' => $level->disciplines->map(function ($discipline) {
+                        return [
+                            'id' => $discipline->id,
+                            'name' => $discipline->name
+                        ];
+                    }),
+                ];
+            });
+
+            return ApiResponse::success([
+                'school_id' => $school->id,
+                'type_education' => $school->typeEducation->name,
+                'levels' => $mappedLevels,
+                'courses' => [],
+            ]);
+        }
+
+        // Para Ensino Médio
+        // Verificar se a escola tem categoria e cursos
+        if (!$school->category || $school->category->courses->isEmpty()) {
+            return ApiResponse::success([
+                'school_id' => $school->id,
+                'type_education' => $school->typeEducation->name,
+                'levels' => [],
+                'courses' => [],
+            ]);
+        }
+
+        // Obter disciplinas dos cursos da escola
+        $courseDisciplines = $school->category->courses->flatMap(function ($course) {
+            return $course->disciplines;
+        })->unique('id');
+
+        // Mapear os níveis filtrados
+        $mappedLevels = $levels->map(function ($level) use ($courseDisciplines, $school) {
+            // Filtrar disciplinas que estão no nível e nos cursos da escola
+            $validDisciplines = $level->disciplines->intersect($courseDisciplines);
+
+            return [
+                'id' => $level->id,
+                'name' => $level->name,
+                'year' => $level->year,
+                'disciplines' => $validDisciplines->map(function ($discipline) {
+                    return [
+                        'id' => $discipline->id,
+                        'name' => $discipline->name
+                    ];
+                }),
+            ];
+        });
+
+        // Carregar cursos da escola
+        $courses = $school->category->courses->map(function ($course) use ($school) {
+            return [
+                'id' => $course->id,
+                'name' => $course->name,
+                'disciplines' => $course->disciplines->map(function ($discipline) {
+                    return [
+                        'id' => $discipline->id,
+                        'name' => $discipline->name
+                    ];
+                }),
+            ];
+        });
+
+        // Retornar a resposta JSON
+        return ApiResponse::success([
+            'school_id' => $school->id,
+            'type_education' => $school->typeEducation->name,
+            'levels' => $mappedLevels,
+            'courses' => $courses,
+        ]);
     }
 
     /**
-     * Create a new Discipline
-     * 
-     * @OA\Post(
-     *     path="/discipline",
+     * @OA\Get(
+     *     path="/disciplines/levels/{level}",
+     *     summary="Lista disciplinas de um nível específico",
+     *     description="Recupera disciplinas vinculadas a um nível específico dentro de uma escola.",
+     *     operationId="getLevelDisciplines",
      *     tags={"Discipline"},
-     *     summary="Create a new Discipline",
-     *     security={{ "sanctum": {} }},
+     *     @OA\Parameter(
+     *         name="school",
+     *         in="path",
+     *         description="ID da escola",
+     *         required=true,
+     *         @OA\Schema(type="string", format="uuid")
+     *     ),
+     *     @OA\Parameter(
+     *         name="level",
+     *         in="path",
+     *         description="ID do nível",
+     *         required=true,
+     *         @OA\Schema(type="string", format="uuid")
+     *     ),
+     *     @OA\Response(response=200, description="Disciplinas encontradas")
+     * )
+     */
+    public function getLevelDisciplines(Level $level)
+    {
+        $school = Auth::user()->school;
+
+        if (!$school) {
+            return ApiResponse::error('Nenhuma escola associada ao usuário logado.', 404);
+        }
+
+        $disciplines = $level->disciplines()
+            ->wherePivot('school_id', $school->id)
+            ->get();
+
+        return ApiResponse::success($disciplines, 200);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/disciplines/levels/{level}",
+     *     summary="Adiciona uma disciplina a um nível",
+     *     description="Associa uma disciplina a um nível específico de uma escola.",
+     *     operationId="addLevelDiscipline",
+     *     tags={"Discipline"},
+     *     @OA\Parameter(
+     *         name="school",
+     *         in="path",
+     *         description="ID da escola",
+     *         required=true,
+     *         @OA\Schema(type="string", format="uuid")
+     *     ),
+     *     @OA\Parameter(
+     *         name="level",
+     *         in="path",
+     *         description="ID do nível",
+     *         required=true,
+     *         @OA\Schema(type="string", format="uuid")
+     *     ),
      *     @OA\RequestBody(
      *         required=true,
-     *         description="JSON object containing new Discipline data",
-     *         @OA\JsonContent(ref="#/components/schemas/DisciplineStoreRequest")
+     *         @OA\JsonContent(
+     *             required={"discipline_id"},
+     *             @OA\Property(property="discipline_id", type="string", format="uuid", description="ID da disciplina")
+     *         )
      *     ),
      *     @OA\Response(
      *         response=201,
-     *         description="Discipline created successfully",
-     *         @OA\JsonContent(ref="#/components/schemas/DisciplineResource")
+     *         description="Disciplina associada com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Disciplina associada com sucesso!")
+     *         )
      *     ),
      *     @OA\Response(
      *         response=422,
-     *         description="Validation error"
-     *     ),
-     *     @OA\Response(
-     *         response=500,
-     *         description="Internal server error"
+     *         description="Erro de validação",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="O campo discipline_id é obrigatório.")
+     *         )
      *     )
      * )
      */
-    public function create(DisciplineStoreRequest $request)
+    public function addLevelDiscipline(Request $request, Level $level)
     {
-        try {
-            $data = $this->repository->create($request->validated());
-            return ApiResponse::success(DisciplineResource::make($data), 'Discipline created successfully', 201);
-        } catch (\Exception $e) {
-            Log::error('Error creating Discipline: ', ['exception' => $e]);
-            return ApiResponse::error('Error creating Discipline: ' . $e->getMessage(), 500);
+        $validated = $request->validate([
+            'discipline_id' => 'required|exists:disciplines,id',
+        ]);
+
+        $school = Auth::user()->school;
+
+        if (!$school) {
+            return ApiResponse::error('Nenhuma escola associada ao usuário logado.', 404);
         }
+
+        SchoolLevelDiscipline::firstOrCreate([
+            'school_id' => $school->id,
+            'level_id' => $level->id,
+            'discipline_id' => $validated['discipline_id'],
+        ]);
+
+        return ApiResponse::success(['message' => 'Disciplina associada com sucesso!'], 201);
     }
+
     /**
-     * Show details of a specific Discipline
-     *
-     * @OA\Get(
-     *     path="/discipline/{id}",
+     * @OA\Delete(
+     *     path="/disciplines/{discipline}/levels/{level}/",
+     *     summary="Remove uma disciplina de um nível",
+     *     description="Remove a associação de uma disciplina com um nível específico de uma escola.",
+     *     operationId="removeLevelDiscipline",
      *     tags={"Discipline"},
-     *     summary="Retrieve details of a Discipline by ID",
-     *     security={{ "sanctum": {} }},
      *     @OA\Parameter(
-     *         name="id",
+     *         name="school",
      *         in="path",
-     *         description="Discipline ID",
+     *         description="ID da escola",
      *         required=true,
-     *         @OA\Schema(type="string")
+     *         @OA\Schema(type="string", format="uuid")
+     *     ),
+     *     @OA\Parameter(
+     *         name="level",
+     *         in="path",
+     *         description="ID do nível",
+     *         required=true,
+     *         @OA\Schema(type="string", format="uuid")
+     *     ),
+     *     @OA\Parameter(
+     *         name="discipline",
+     *         in="path",
+     *         description="ID da disciplina",
+     *         required=true,
+     *         @OA\Schema(type="string", format="uuid")
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Discipline data",
-     *         @OA\JsonContent(ref="#/components/schemas/DisciplineResource")
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Discipline not found"
+     *         description="Disciplina removida com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Disciplina removida com sucesso!")
+     *         )
      *     )
      * )
      */
-    public function read($id)
+    public function removeLevelDiscipline(Level $level, Discipline $discipline)
     {
-        $data = $this->repository->find($id);
-        if ($data) {
-            return ApiResponse::success(DisciplineResource::make($data));
+        $school = Auth::user()->school;
+
+        if (!$school) {
+            return ApiResponse::error('Nenhuma escola associada ao usuário logado.', 404);
         }
-        return ApiResponse::error('Discipline not found', 404);
+
+        SchoolLevelDiscipline::where('school_id', $school->id)
+            ->where('level_id', $level->id)
+            ->where('discipline_id', $discipline->id)
+            ->delete();
+
+        return ApiResponse::success(['message' => 'Disciplina removida com sucesso!'], 200);
     }
-     /**
-     * Update an existing Discipline
-     * 
-     * @OA\Put(
-     *     path="/discipline/{id}",
+
+    /**
+     * @OA\Post(
+     *     path="/disciplines/courses/{course}",
+     *     summary="Adiciona uma disciplina a um curso",
+     *     description="Associa uma disciplina a um curso específico de uma escola.",
+     *     operationId="addCourseDiscipline",
      *     tags={"Discipline"},
-     *     summary="Update an existing Discipline",
-     *     security={{ "sanctum": {} }},
      *     @OA\Parameter(
-     *         name="id",
+     *         name="school",
      *         in="path",
-     *         description="Discipline ID",
+     *         description="ID da escola",
      *         required=true,
-     *         @OA\Schema(type="integer")
+     *         @OA\Schema(type="string", format="uuid")
+     *     ),
+     *     @OA\Parameter(
+     *         name="course",
+     *         in="path",
+     *         description="ID do curso",
+     *         required=true,
+     *         @OA\Schema(type="string", format="uuid")
      *     ),
      *     @OA\RequestBody(
      *         required=true,
-     *         description="Updated Discipline data",
-     *         @OA\JsonContent(ref="#/components/schemas/DisciplineUpdateRequest")
+     *         @OA\JsonContent(
+     *             required={"discipline_id"},
+     *             @OA\Property(property="discipline_id", type="string", format="uuid", description="ID da disciplina")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Disciplina associada com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Disciplina associada com sucesso!")
+     *         )
+     *     )
+     * )
+     */
+    public function addCourseDiscipline(Request $request, Course $course)
+    {
+        $validated = $request->validate([
+            'discipline_id' => 'required|exists:disciplines,id',
+        ]);
+
+        $school = Auth::user()->school;
+
+        if (!$school) {
+            return ApiResponse::error('Nenhuma escola associada ao usuário logado.', 404);
+        }
+
+        SchoolCourseDiscipline::firstOrCreate([
+            'school_id' => $school->id,
+            'course_id' => $course->id,
+            'discipline_id' => $validated['discipline_id'],
+        ]);
+
+        return ApiResponse::success(['message' => 'Disciplina associada com sucesso!'], 201);
+    }
+
+    /**
+     * @OA\Delete(
+     *     path="/disciplines/{discipline}/courses/{course}",
+     *     summary="Remove uma disciplina de um curso",
+     *     description="Remove a associação de uma disciplina com um curso específico de uma escola.",
+     *     operationId="removeCourseDiscipline",
+     *     tags={"Discipline"},
+     *     @OA\Parameter(
+     *         name="school",
+     *         in="path",
+     *         description="ID da escola",
+     *         required=true,
+     *         @OA\Schema(type="string", format="uuid")
+     *     ),
+     *     @OA\Parameter(
+     *         name="course",
+     *         in="path",
+     *         description="ID do curso",
+     *         required=true,
+     *         @OA\Schema(type="string", format="uuid")
+     *     ),
+     *     @OA\Parameter(
+     *         name="discipline",
+     *         in="path",
+     *         description="ID da disciplina",
+     *         required=true,
+     *         @OA\Schema(type="string", format="uuid")
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Discipline updated successfully",
-     *         @OA\JsonContent(ref="#/components/schemas/DisciplineResource")
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Discipline not found"
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation error"
+     *         description="Disciplina removida com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Disciplina removida com sucesso!")
+     *         )
      *     )
      * )
      */
-    public function update(DisciplineUpdateRequest $request, $id)
+    public function removeCourseDiscipline(Course $course, Discipline $discipline)
     {
-        try {
-            $success = $this->repository->update($id, $request->validated());
-            if ($success) {
-                return ApiResponse::success(DisciplineResource::make($success), 'Discipline updated successfully');
-            }
-            return ApiResponse::error('Discipline not found', 404);
-        } catch (\Exception $e) {
-            Log::error('Error updating Discipline: ', ['exception' => $e]);
-            return ApiResponse::error('Error updating Discipline: ' . $e->getMessage(), 500);
+        $school = Auth::user()->school;
+
+        if (!$school) {
+            return ApiResponse::error('Nenhuma escola associada ao usuário logado.', 404);
         }
-    }
-     /**
-     * Delete a specific Discipline
-     * 
-     * @OA\Delete(
-     *     path="/discipline/{id}",
-     *     tags={"Discipline"},
-     *     summary="Delete a Discipline by ID",
-     *     security={{ "sanctum": {} }},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         description="Discipline ID",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=204,
-     *         description="Discipline deleted successfully"
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Discipline not found"
-     *     )
-     * )
-     */
-    public function delete($id)
-    {
-        try {
-            $data = $this->repository->delete($id);
-            if ($data) {
-                return ApiResponse::success(null, 'Discipline deleted successfully');
-            }
-            return ApiResponse::error('Discipline not found', 404);
-        } catch (\Exception $e) {
-            Log::error('Error deleting Discipline: ', ['exception' => $e]);
-            return ApiResponse::error('Error deleting Discipline: ' . $e->getMessage(), 500);
-        }
+
+        SchoolCourseDiscipline::where('school_id', $school->id)
+            ->where('course_id', $course->id)
+            ->where('discipline_id', $discipline->id)
+            ->delete();
+
+        return ApiResponse::success(['message' => 'Disciplina removida com sucesso!'], 200);
     }
 }

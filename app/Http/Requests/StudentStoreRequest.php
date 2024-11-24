@@ -94,7 +94,6 @@ use Illuminate\Foundation\Http\FormRequest;
  *     ),
  * )
  */
-
 class StudentStoreRequest extends FormRequest
 {
     /**

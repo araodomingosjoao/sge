@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\AllocationController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClassController;
@@ -23,18 +24,25 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         'create' => 'role:admin_school',
         'delete' => 'role:admin_school' 
     ]);
-    Route::get('/schools/{school}/data', [SchoolController::class, 'index']);
-    Route::get('/schools/{school}/levels/{level}/disciplines', [SchoolController::class, 'getLevelDisciplines']);
-    Route::post('/schools/{school}/levels/{level}/disciplines', [SchoolController::class, 'addLevelDiscipline']);
-    Route::delete('/schools/{school}/levels/{level}/disciplines/{discipline}', [SchoolController::class, 'removeLevelDiscipline']);
-    Route::post('/schools/{school}/courses/{course}/disciplines', [SchoolController::class, 'addCourseDiscipline']);
-    Route::delete('/schools/{school}/courses/{course}/disciplines/{discipline}', [SchoolController::class, 'removeCourseDiscipline']);
     Route::get('/user/profile', [AuthController::class, 'profile']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::apiCrud('user', UserController::class);
     Route::apiCrud('level', LevelController::class);
-    Route::apiCrud('discipline', DisciplineController::class);
     Route::apiCrud('teacher', TeacherController::class);
+
+
+    Route::get('/disciplines', [DisciplineController::class, 'index']);
+    Route::get('/disciplines/levels/{level}', [DisciplineController::class, 'getLevelDisciplines']);
+    Route::post('/disciplines/levels/{level}', [DisciplineController::class, 'addLevelDiscipline']);
+    Route::delete('/disciplines/{discipline}/levels/{level}/', [DisciplineController::class, 'removeLevelDiscipline']);
+
+    Route::get('/academic-years', [AcademicYearController::class, 'showAcademicYearWithTrimesters']);
+    Route::put('/academic-years/{academicYear}/trimesters', [AcademicYearController::class, 'updateTrimesters']);
+    Route::put('/academic-years/{academicYear}', [AcademicYearController::class, 'updateAcademicYear']);
+
+    Route::post('/disciplines/courses/{course}', [SchoolController::class, 'addCourseDiscipline']);
+    Route::delete('/disciplines/{discipline}/courses/{course}/disciplines', [SchoolController::class, 'removeCourseDiscipline']);
+    
     Route::apiCrud('class', ClassController::class);
     Route::apiCrud('classroom', ClassroomController::class);
     Route::apiCrud('allocations', AllocationController::class);

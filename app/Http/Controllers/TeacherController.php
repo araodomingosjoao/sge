@@ -6,11 +6,8 @@ use App\Helpers\ApiResponse;
 use App\Http\Requests\TeacherStoreRequest;
 use App\Http\Requests\TeacherUpdateRequest;
 use App\Http\Resources\TeacherResource;
-use App\Models\Discipline;
 use App\Models\Role;
-use App\Models\SchoolClass;
 use App\Models\Teacher;
-use App\Models\TeacherDisciplineClass;
 use App\Models\User;
 use App\Repositories\TeacherRepository;
 use App\Services\FileUploadService;
@@ -20,17 +17,15 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @OA\Tag(
+ *     name="Teacher",
+ *     description="API Endpoints for Teacher"
+ * )
+ */
 class TeacherController extends Controller
 {
-    use CrudTrait;
-
-    protected $storeValidationRules = [];
-    protected $updateValidationRules = [];
-    
-    protected $uniqueFields = [];
-
-    protected $resource = TeacherResource::class;
-    protected $resourceDetails = TeacherResource::class;
+    protected $repository;
     protected $fileUploadService;
 
     public function __construct(
@@ -42,12 +37,39 @@ class TeacherController extends Controller
         $this->fileUploadService = $fileUploadService;
     }
 
+    /**
+     * Create a new teacher
+     * 
+     * @OA\Post(
+     *     path="/teacher",
+     *     tags={"Teacher"},
+     *     summary="Create a new teacher",
+     *     security={{ "sanctum": {} }},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="JSON object containing new teacher data",
+     *         @OA\JsonContent(ref="#/components/schemas/TeacherStoreRequest")
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Class created successfully",
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal server error"
+     *     )
+     * )
+     */
     public function create(TeacherStoreRequest $request)
     {
         DB::beginTransaction();
 
         try {
-            $requestData = $request->validationData();
+            $requestData = $request->validated();
             $requestData['password'] = Hash::make($requestData['password']);
     
             if ($request->hasFile('profile_picture_path')) {
