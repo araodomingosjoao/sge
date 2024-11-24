@@ -1,8 +1,11 @@
 <?php
 
+use App\Console\Commands\ManageAcademicYear;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -20,4 +23,14 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
+    })->withCommands([
+        ManageAcademicYear::class,
+    ])->withSchedule(function (Schedule $schedule) {
+        // Fechar ano letivo atual no último dia do ano
+        $schedule->command('academic:manage close-current')
+            ->daily();
+
+        // Criar próximo ano letivo no primeiro dia do ano
+        $schedule->command('academic:manage create-next')
+            ->daily();
     })->create();

@@ -12,22 +12,17 @@ class Trimester extends Model
     use HasFactory, SoftDeletes, HasUuids;
 
     protected $fillable = [
-        'school_id',
-        'name',
-        'trimester_number',
-        'academic_year',
+        'academic_year_id', 
+        'name', 
+        'start_date', 
+        'end_date'
     ];
 
-    protected $casts = [
-        'id' => 'string',
-        'school_id' => 'string',
-        'trimester_number' => 'integer',
-        'academic_year' => 'integer',
-    ];
+    protected $dates = ['start_date', 'end_date'];
 
-    public function school()
+    public function academicYear()
     {
-        return $this->belongsTo(School::class);
+        return $this->belongsTo(AcademicYear::class);
     }
 
     public function calendar()

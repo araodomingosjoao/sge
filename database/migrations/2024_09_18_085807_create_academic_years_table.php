@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('trimesters', function (Blueprint $table) {
+        Schema::create('academic_years', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('academic_year_id')->constrained('academic_years')->cascadeOnDelete();
-            $table->string('name');
+            $table->foreignUuid('school_id')->constrained()->cascadeOnDelete();
+            $table->integer('year');
             $table->date('start_date');
             $table->date('end_date');
+            $table->enum('status', ['active', 'closed'])->default('active');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('trimesters');
+        Schema::dropIfExists('academic_years');
     }
 };
