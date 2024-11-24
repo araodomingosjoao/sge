@@ -37,7 +37,7 @@ class BeforeUpdateSubscriber
 
         foreach ($fileFields as $field => $options) {
             if (isset($data[$field])) {
-                $this->fileUploadService->deleteOldFile($model->getOriginal($field), $options['disk'] ?? 'public');
+                $this->fileUploadService->deleteOldFile($data[$field], $options['disk'] ?? 'public');
                 $event->data[$field] = $this->processField($data[$field], $options);
             }
         }
