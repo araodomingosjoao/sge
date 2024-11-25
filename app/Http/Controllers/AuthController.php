@@ -7,6 +7,7 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Services\SetupService;
 use Illuminate\Support\Facades\Hash;
 
 /**
@@ -17,6 +18,12 @@ use Illuminate\Support\Facades\Hash;
  */
 class AuthController extends Controller
 {
+    protected $setupService;
+
+    public function __construct(SetupService $setupService)
+    {
+        $this->setupService = $setupService;
+    }
     /**
      * Login a user and generate a token
      * 
@@ -123,13 +130,19 @@ class AuthController extends Controller
     public function profile(Request $request)
     {
         $user = $request->user();
+        $schoolId = $user->school_id;
         $role = $user->getRoleNames()->first();
         $permissions = $user->getAllPermissions()->pluck('name');
 
+        if ($this->setupService->isFirstLogin($schoolId)) {
+            $this->setupService->initializeSetupSteps($schoolId);
+        }
+
         return response()->json([
+            'setup_required' => !$this->setupService->isSetupComplete($schoolId),
             'user' => UserResource::make($user),
             'role' => $role,
-            'permissions' => $permissions,
+            'permissions' => $permissions
         ]);
     }
 }

@@ -10,6 +10,7 @@ use App\Http\Controllers\LevelController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SchoolController;
 use App\Http\Controllers\SchoolRegistrationController;
+use App\Http\Controllers\SetupController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\UserController;
@@ -21,6 +22,8 @@ Route::post('/school/register', [SchoolRegistrationController::class, 'register'
 Route::get('/options', [SchoolController::class, 'options']);
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
+    Route::post('/setup/step/{step}', [SetupController::class, 'completeStep']);
+    Route::get('/setup/status', [SetupController::class, 'checkSetupStatus']);
     Route::apiCrud('schools', SchoolController::class, null, [
         'create' => 'role:admin_school',
         'delete' => 'role:admin_school' 

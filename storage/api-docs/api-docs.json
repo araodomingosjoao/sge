@@ -2081,6 +2081,171 @@
                 }
             }
         },
+        "/setup/status": {
+            "get": {
+                "tags": [
+                    "Setup"
+                ],
+                "summary": "Check the setup status",
+                "description": "Returns whether the setup is required and the current progress of the school setup.",
+                "operationId": "checkSetupStatus",
+                "responses": {
+                    "200": {
+                        "description": "Setup status and progress",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "setup_required": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "progress": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "step": {
+                                                        "type": "string",
+                                                        "example": "informacoes"
+                                                    },
+                                                    "completed": {
+                                                        "type": "boolean",
+                                                        "example": false
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/setup/step/{step}": {
+            "post": {
+                "tags": [
+                    "Setup"
+                ],
+                "summary": "Complete a setup step",
+                "description": "Marks a specific step of the school setup process as completed.",
+                "operationId": "completeStep",
+                "parameters": [
+                    {
+                        "name": "step",
+                        "in": "path",
+                        "description": "The name of the setup step to mark as completed",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "informacoes"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "data": {
+                                        "description": "Data related to the step",
+                                        "type": "object",
+                                        "example": {
+                                            "field": "value"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Step completed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Step completed successfully"
+                                        },
+                                        "step": {
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "informacoes"
+                                                },
+                                                "completed_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2024-11-21T12:34:56Z"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "progress": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "step": {
+                                                        "type": "string",
+                                                        "example": "informacoes"
+                                                    },
+                                                    "completed": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Validation error details"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/students/trashed": {
             "get": {
                 "tags": [
@@ -3232,6 +3397,10 @@
         {
             "name": "Schools",
             "description": "API Endpoints for Schools"
+        },
+        {
+            "name": "Setup",
+            "description": "Endpoints for managing the school setup process"
         },
         {
             "name": "Students",
