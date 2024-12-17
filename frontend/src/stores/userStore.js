@@ -6,6 +6,7 @@ export const useUserStore = defineStore({
         user: null,
         permissions: [],
         role: '',
+        setup_required: false
     }),
     getters: {
         isAdmin: (state) => state.role  === 'school_admin',
@@ -15,6 +16,7 @@ export const useUserStore = defineStore({
             this.user = data.user;
             this.permissions = data.permissions;
             this.role = data.role;
+            this.setup_required = data.setup_required;
         },
         clearUser() {
             this.user = null;
@@ -25,7 +27,7 @@ export const useUserStore = defineStore({
     persist: {
         enabled: true,
         strategies: [
-            { storage: localStorage, paths: ['user', 'permissions', 'role'] }
+            { storage: localStorage, paths: ['user', 'permissions', 'role', 'setup_required'] }
         ],
     },
 });

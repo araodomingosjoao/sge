@@ -1,15 +1,23 @@
 <template>
     <div class="mb-3">
         <label :for="id" class="form-label">{{ label }}</label>
-        <input
+        <select
             :id="id"
-            :type="type"
-            :placeholder="placeholder"
-            class="form-control"
-            :value="inputValue"
+            class="form-select"
+            :value="selectValue"
             :class="{'is-invalid': errors.length > 0}"
-            @input="handleInput"
-        />
+            @change="handleSelect"
+            :disabled="disabled"
+        >
+            <option value="">{{ placeholder }}</option>
+            <option 
+                v-for="option in options" 
+                :key="option[optionValue]"
+                :value="option[optionValue]"
+            >
+                {{ option[optionLabel] }}
+            </option>
+        </select>
         <div v-if="errors.length" class="invalid-feedback">
             <span v-for="(error, index) in errors" :key="index">{{
                 error
@@ -23,7 +31,7 @@ import { defineComponent, computed, watch } from "vue";
 import { useField } from "vee-validate";
 
 export default defineComponent({
-    name: "AppFormInput",
+    name: "AppFormSelect",
     props: {
         id: {
             type: String,
@@ -35,15 +43,23 @@ export default defineComponent({
         },
         placeholder: {
             type: String,
-            default: "",
+            default: "Selecione...",
         },
         modelValue: {
             type: [String, Number],
             default: "",
         },
-        type: {
+        options: {
+            type: Array,
+            required: true,
+        },
+        optionLabel: {
             type: String,
-            default: "text",
+            default: "name",
+        },
+        optionValue: {
+            type: String,
+            default: "id",
         },
         rules: {
             type: String,
@@ -63,7 +79,7 @@ export default defineComponent({
             return errorMessage.value ? [errorMessage.value] : [];
         });
 
-        const handleInput = (event) => {
+        const handleSelect = (event) => {
             const newValue = event.target.value;
             value.value = newValue;
             emit('update:modelValue', newValue);
@@ -71,8 +87,8 @@ export default defineComponent({
 
         return {
             errors,
-            handleInput,
-            inputValue: value,
+            handleSelect,
+            selectValue: value,
         };
     },
 });

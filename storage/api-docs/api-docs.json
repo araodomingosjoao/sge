@@ -2086,12 +2086,12 @@
                 "tags": [
                     "Setup"
                 ],
-                "summary": "Check the setup status",
-                "description": "Returns whether the setup is required and the current progress of the school setup.",
+                "summary": "Verifica o status da configuração",
+                "description": "Retorna se a configuração é necessária e o progresso atual do setup da escola.",
                 "operationId": "checkSetupStatus",
                 "responses": {
                     "200": {
-                        "description": "Setup status and progress",
+                        "description": "Status do setup e progresso",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2101,20 +2101,74 @@
                                             "example": true
                                         },
                                         "progress": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "step": {
-                                                        "type": "string",
-                                                        "example": "informacoes"
-                                                    },
-                                                    "completed": {
-                                                        "type": "boolean",
-                                                        "example": false
-                                                    }
+                                            "properties": {
+                                                "total_steps": {
+                                                    "type": "integer",
+                                                    "example": 8
                                                 },
-                                                "type": "object"
-                                            }
+                                                "completed_steps": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                },
+                                                "progress_percentage": {
+                                                    "type": "integer",
+                                                    "example": 37
+                                                },
+                                                "current_step": {
+                                                    "type": "string",
+                                                    "example": "school_info"
+                                                },
+                                                "steps": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "key": {
+                                                                "type": "string",
+                                                                "example": "school_info"
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Informações da Escola"
+                                                            },
+                                                            "description": {
+                                                                "type": "string",
+                                                                "example": "Configure as informações básicas"
+                                                            },
+                                                            "icon": {
+                                                                "type": "string",
+                                                                "example": "ri-building-line"
+                                                            },
+                                                            "order": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "required": {
+                                                                "type": "boolean",
+                                                                "example": true
+                                                            },
+                                                            "status": {
+                                                                "type": "string",
+                                                                "example": "pending"
+                                                            },
+                                                            "completed": {
+                                                                "type": "boolean",
+                                                                "example": false
+                                                            },
+                                                            "completed_at": {
+                                                                "type": "string",
+                                                                "format": "date-time",
+                                                                "nullable": true
+                                                            },
+                                                            "can_skip": {
+                                                                "type": "boolean",
+                                                                "example": false
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -2123,7 +2177,7 @@
                         }
                     },
                     "401": {
-                        "description": "Unauthorized"
+                        "description": "Não autorizado"
                     }
                 },
                 "security": [
@@ -2138,18 +2192,27 @@
                 "tags": [
                     "Setup"
                 ],
-                "summary": "Complete a setup step",
-                "description": "Marks a specific step of the school setup process as completed.",
+                "summary": "Completa uma etapa do setup",
+                "description": "Marca uma etapa específica do processo de configuração como concluída.",
                 "operationId": "completeStep",
                 "parameters": [
                     {
                         "name": "step",
                         "in": "path",
-                        "description": "The name of the setup step to mark as completed",
+                        "description": "Chave da etapa a ser completada",
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "example": "informacoes"
+                            "enum": [
+                                "school_info",
+                                "academic_periods",
+                                "courses",
+                                "subjects",
+                                "classes",
+                                "departments",
+                                "staff_roles",
+                                "final_review"
+                            ]
                         }
                     }
                 ],
@@ -2158,13 +2221,12 @@
                     "content": {
                         "application/json": {
                             "schema": {
+                                "required": [
+                                    "data"
+                                ],
                                 "properties": {
                                     "data": {
-                                        "description": "Data related to the step",
-                                        "type": "object",
-                                        "example": {
-                                            "field": "value"
-                                        }
+                                        "type": "object"
                                     }
                                 },
                                 "type": "object"
@@ -2174,44 +2236,61 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Step completed successfully",
+                        "description": "Etapa concluída com sucesso",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
                                         "message": {
                                             "type": "string",
-                                            "example": "Step completed successfully"
-                                        },
-                                        "step": {
-                                            "properties": {
-                                                "name": {
-                                                    "type": "string",
-                                                    "example": "informacoes"
-                                                },
-                                                "completed_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-11-21T12:34:56Z"
-                                                }
-                                            },
-                                            "type": "object"
+                                            "example": "Etapa concluída com sucesso"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/setup/step/{step}/skip": {
+            "post": {
+                "tags": [
+                    "Setup"
+                ],
+                "summary": "Pula uma etapa opcional",
+                "description": "Marca uma etapa opcional como pulada no processo de configuração.",
+                "operationId": "skipStep",
+                "parameters": [
+                    {
+                        "name": "step",
+                        "in": "path",
+                        "description": "Chave da etapa a ser pulada",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Etapa pulada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Etapa pulada com sucesso"
                                         },
                                         "progress": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "step": {
-                                                        "type": "string",
-                                                        "example": "informacoes"
-                                                    },
-                                                    "completed": {
-                                                        "type": "boolean",
-                                                        "example": true
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
+                                            "$ref": "#/components/schemas/SetupProgress"
                                         }
                                     },
                                     "type": "object"
@@ -2220,23 +2299,50 @@
                         }
                     },
                     "422": {
-                        "description": "Validation error",
+                        "description": "Etapa não pode ser pulada",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
                                         "error": {
                                             "type": "string",
-                                            "example": "Validation error details"
+                                            "example": "Esta etapa não pode ser pulada"
                                         }
                                     },
                                     "type": "object"
                                 }
                             }
                         }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/setup/steps": {
+            "get": {
+                "tags": [
+                    "Setup"
+                ],
+                "summary": "Lista todas as etapas",
+                "description": "Retorna todas as etapas disponíveis do processo de configuração.",
+                "operationId": "listSteps",
+                "responses": {
+                    "200": {
+                        "description": "Lista de etapas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/SetupStep"
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -3320,6 +3426,108 @@
                 },
                 "type": "object"
             },
+            "SetupStep": {
+                "title": "Setup Step",
+                "description": "Modelo de uma etapa do setup da escola",
+                "properties": {
+                    "key": {
+                        "description": "Identificador único da etapa",
+                        "type": "string",
+                        "example": "school_info"
+                    },
+                    "name": {
+                        "description": "Nome da etapa",
+                        "type": "string",
+                        "example": "Informações da Escola"
+                    },
+                    "description": {
+                        "description": "Descrição detalhada da etapa",
+                        "type": "string",
+                        "example": "Configure as informações básicas da instituição"
+                    },
+                    "icon": {
+                        "description": "Ícone representativo da etapa",
+                        "type": "string",
+                        "example": "ri-building-line"
+                    },
+                    "order": {
+                        "description": "Ordem de exibição/execução da etapa",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "required": {
+                        "description": "Indica se a etapa é obrigatória",
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "status": {
+                        "description": "Status atual da etapa",
+                        "type": "string",
+                        "enum": [
+                            "pending",
+                            "in_progress",
+                            "completed"
+                        ],
+                        "example": "pending"
+                    },
+                    "completed": {
+                        "description": "Indica se a etapa foi concluída",
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "completed_at": {
+                        "description": "Data e hora de conclusão da etapa",
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "can_skip": {
+                        "description": "Indica se a etapa pode ser pulada",
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "submitted_data": {
+                        "description": "Dados enviados na conclusão da etapa",
+                        "type": "object",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "SetupProgress": {
+                "title": "Setup Progress",
+                "description": "Progresso geral do setup da escola",
+                "properties": {
+                    "total_steps": {
+                        "description": "Total de etapas do setup",
+                        "type": "integer",
+                        "example": 8
+                    },
+                    "completed_steps": {
+                        "description": "Número de etapas concluídas",
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "progress_percentage": {
+                        "description": "Percentual de conclusão do setup",
+                        "type": "integer",
+                        "example": 37
+                    },
+                    "current_step": {
+                        "description": "Etapa atual do setup",
+                        "type": "string",
+                        "example": "school_info"
+                    },
+                    "steps": {
+                        "description": "Lista de todas as etapas com seus estados",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SetupStep"
+                        }
+                    }
+                },
+                "type": "object"
+            },
             "User": {
                 "title": "User",
                 "description": "User data response",
@@ -3400,7 +3608,7 @@
         },
         {
             "name": "Setup",
-            "description": "Endpoints for managing the school setup process"
+            "description": "API endpoints para gerenciar o processo de configuração inicial da escola"
         },
         {
             "name": "Students",

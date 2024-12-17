@@ -1,7 +1,20 @@
-import { defineRule } from 'vee-validate';
-import { all } from '@vee-validate/rules';
+import { defineRule, configure } from 'vee-validate';
+import { required, email, min, max } from '@vee-validate/rules';
 
+defineRule('required', required);
+defineRule('email', email);
+defineRule('min', min);
+defineRule('max', max);
 
-Object.entries(all).forEach(([name, rule]) => {
-  defineRule(name, rule);
+// Mensagens em português
+configure({
+    generateMessage: (context) => {
+        const messages = {
+            required: `${context.field} é obrigatório`,
+            email: 'Email inválido',
+            min: `${context.field} deve ter no mínimo ${context.rule.params} caracteres`,
+            min: `${context.field} deve ter no maximo ${context.rule.params} caracteres`,
+        };
+        return messages[context.rule.name];
+    }
 });

@@ -50,6 +50,7 @@
 import { ref } from 'vue';
 import { useAuth } from '../../composables/useAuth';
 import { useUser } from '../../composables/useUser';
+import { useUserStore } from '../../stores/userStore';
 import router from '../../router'
 import Swal from '../../utils/swal';
 import AppForm from '../../components/UI/AppForm.vue';
@@ -73,13 +74,14 @@ export default {
         const isLoading = ref(false);
         const { login } = useAuth();
         const { fetchUser } = useUser();
+        const userStore = useUserStore();
 
         const onLogin = async () => {
             isLoading.value = true
             try {
                 await login(email.value, password.value);
                 await fetchUser()
-                router.push({ name: 'Dashboard' });
+                userStore.$state.setup_required ? router.push({ name: 'SchoolSetup' }) : router.push({ name: 'Dashboard' });
             } catch (error) {
                 Swal.error({
                     title: "Erro ao fazer login",

@@ -134,10 +134,6 @@ class AuthController extends Controller
         $role = $user->getRoleNames()->first();
         $permissions = $user->getAllPermissions()->pluck('name');
 
-        if ($this->setupService->isFirstLogin($schoolId)) {
-            $this->setupService->initializeSetupSteps($schoolId);
-        }
-
         return response()->json([
             'setup_required' => !$this->setupService->isSetupComplete($schoolId),
             'user' => UserResource::make($user),

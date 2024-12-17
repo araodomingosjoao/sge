@@ -7,8 +7,8 @@ export function useUser() {
     const fetchUser = async () => {
         try {
             const response = await axios.get('/user/profile');
-            const { user, permissions, role }  = response.data;
-            userStore.setUser({ user, permissions, role });
+            const { user, permissions, role, setup_required }  = response.data;
+            userStore.setUser({ user, permissions, role, setup_required });
         } catch (error) {
             throw new Error(error.response?.data?.message || 'Erro ao recuperar os dados do usuário:');
         }

@@ -11,6 +11,12 @@ const routes = [
         meta: { layout: 'ErrorLayout' },
     },
     {
+        path: '/setup',
+        name: 'SchoolSetup',
+        component: () => import('@/views/setup/Index.vue'),
+        meta: { requiresAuth: true, layout: 'ErrorLayout' }
+    },
+    {
         path: "/dashboard",
         name: "Dashboard",
         component: () => import("@/views/Dashboard.vue"),
