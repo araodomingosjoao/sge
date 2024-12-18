@@ -17,11 +17,6 @@ class Level extends BaseModel
         'id' => 'string',
     ];
 
-    public function classes()
-    {
-        return $this->hasMany(SchoolClass::class, 'level_id');
-    }
-
     public function typeEducation()
     {
         return $this->belongsTo(TypeEducation::class);
@@ -29,6 +24,21 @@ class Level extends BaseModel
 
     public function disciplines()
     {
-        return $this->belongsToMany(Discipline::class, 'level_discipline');
+        return $this->belongsToMany(Discipline::class, 'level_disciplines');
+    }
+
+    public function schoolLevelDisciplines()
+    {
+        return $this->hasMany(SchoolLevelDiscipline::class);
+    }
+
+    public function schoolLevels()
+    {
+        return $this->hasMany(SchoolLevel::class);
+    }
+
+    public function levelCourseDisciplines()
+    {
+        return $this->hasMany(LevelCourseDiscipline::class);
     }
 }

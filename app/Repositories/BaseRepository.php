@@ -119,7 +119,6 @@ class BaseRepository implements RepositoryInterface
     public function paginateWithFiltersAndSort($filters = [], $search = '', $perPage = 15, $sortColumn = 'id', $sortDirection = 'asc'): LengthAwarePaginator
     {
         $query = $this->model->newQuery();
-        Log::inf('teste', [$this->model->newQuery()]);
         foreach ($filters as $key => $value) {
             if ($value) {
                 if ($key === 'start_date' || $key === 'end_date') {

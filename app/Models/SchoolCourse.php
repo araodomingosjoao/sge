@@ -9,13 +9,49 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class SchoolCourse extends Model
 {
-    use HasFactory, SoftDeletes, HasUuids;
+    use HasFactory, HasUuids, SoftDeletes;
 
-    protected $fillable = ['school_id', 'course_id'];
+    protected $fillable = [
+        'school_id',
+        'course_id',
+        // 'is_active',
+        // 'coordinator_id',
+        // 'max_students'
+    ];
 
     protected $casts = [
-        'id' => 'string',
-        'school_id' => 'string',
-        'course_id' => 'string'
+        // 'is_active' => 'boolean',
+        // 'start_date' => 'date',
+        // 'max_students' => 'integer',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'deleted_at' => 'datetime',
     ];
+
+    public function school()
+    {
+        return $this->belongsTo(School::class);
+    }
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class);
+    }
+
+    // public function coordinator()
+    // {
+    //     return $this->belongsTo(User::class, 'coordinator_id');
+    // }
+
+    public function disciplines()
+    {
+        return $this->hasManyThrough(
+            Discipline::class,
+            SchoolLevelDiscipline::class,
+            'course_id',
+            'id',
+            'course_id',
+            'discipline_id'
+        )->distinct();
+    }
 }

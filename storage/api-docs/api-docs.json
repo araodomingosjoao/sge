@@ -25,17 +25,6 @@
                 ],
                 "summary": "List all academic years and their trimesters",
                 "operationId": "9c7689a74d6b595440a21ab3a7007617",
-                "parameters": [
-                    {
-                        "name": "school",
-                        "in": "path",
-                        "description": "ID of the school",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "List of academic years and their trimesters",
@@ -67,7 +56,7 @@
                         "description": "ID of the academic year",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "string"
                         }
                     }
                 ],
@@ -82,8 +71,8 @@
                                         "items": {
                                             "properties": {
                                                 "id": {
-                                                    "type": "integer",
-                                                    "example": 1
+                                                    "type": "string",
+                                                    "example": "9d8f8191-2362-468a-a362-c3c0b9f9efb5"
                                                 },
                                                 "start_date": {
                                                     "type": "string",
@@ -136,7 +125,7 @@
                         "description": "ID of the academic year",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "string"
                         }
                     }
                 ],
@@ -815,12 +804,12 @@
                 "tags": [
                     "Discipline"
                 ],
-                "summary": "Lista disciplinas associadas a uma escola",
-                "description": "Recupera as disciplinas vinculadas a níveis e cursos de uma escola específica.",
+                "summary": "Lista estrutura completa de disciplinas da escola",
+                "description": "Retorna todas as disciplinas organizadas por níveis e cursos",
                 "operationId": "2cc99eff402acf6ce991fd2d287973ee",
                 "responses": {
                     "200": {
-                        "description": "Dados de disciplinas da escola",
+                        "description": "Estrutura de disciplinas",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -834,11 +823,79 @@
                                         },
                                         "levels": {
                                             "type": "array",
-                                            "items": {}
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string",
+                                                        "format": "uuid"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "year": {
+                                                        "type": "integer"
+                                                    },
+                                                    "disciplines": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "string",
+                                                                    "format": "uuid"
+                                                                },
+                                                                "name": {
+                                                                    "type": "string"
+                                                                },
+                                                                "course": {
+                                                                    "properties": {
+                                                                        "id": {
+                                                                            "type": "string",
+                                                                            "format": "uuid"
+                                                                        },
+                                                                        "name": {
+                                                                            "type": "string"
+                                                                        }
+                                                                    },
+                                                                    "type": "object",
+                                                                    "nullable": true
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
                                         },
                                         "courses": {
                                             "type": "array",
-                                            "items": {}
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string",
+                                                        "format": "uuid"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "disciplines": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "string",
+                                                                    "format": "uuid"
+                                                                },
+                                                                "name": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
                                         }
                                     },
                                     "type": "object"
@@ -847,17 +904,54 @@
                         }
                     },
                     "404": {
-                        "description": "Nenhuma escola associada ao usuário logado",
+                        "description": "Escola não encontrada"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/disciplines/all": {
+            "get": {
+                "tags": [
+                    "Discipline"
+                ],
+                "summary": "Lista todas as disciplinas disponíveis",
+                "operationId": "0ec69b6a9aa2fd7b0ec1ab918fdd20a3",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Termo de busca",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Itens por página",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de disciplinas",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Nenhuma escola associada ao usuário logado."
-                                        }
-                                    },
-                                    "type": "object"
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Discipline"
+                                    }
                                 }
                             }
                         }
@@ -870,25 +964,14 @@
                 ]
             }
         },
-        "/disciplines/levels/{level}": {
+        "/disciplines/by-level/{level}": {
             "get": {
                 "tags": [
                     "Discipline"
                 ],
                 "summary": "Lista disciplinas de um nível específico",
-                "description": "Recupera disciplinas vinculadas a um nível específico dentro de uma escola.",
-                "operationId": "getLevelDisciplines",
+                "operationId": "58d5f57b90b0e2f245f31b0b61752e11",
                 "parameters": [
-                    {
-                        "name": "school",
-                        "in": "path",
-                        "description": "ID da escola",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
-                    },
                     {
                         "name": "level",
                         "in": "path",
@@ -902,28 +985,75 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Disciplinas encontradas"
+                        "description": "Lista de disciplinas do nível",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Discipline"
+                                    }
+                                }
+                            }
+                        }
                     }
-                }
-            },
-            "post": {
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/disciplines/by-course/{course}": {
+            "get": {
                 "tags": [
                     "Discipline"
                 ],
-                "summary": "Adiciona uma disciplina a um nível",
-                "description": "Associa uma disciplina a um nível específico de uma escola.",
-                "operationId": "addLevelDiscipline",
+                "summary": "Lista disciplinas de um curso específico",
+                "operationId": "3411cda75d97dc8016fca440129708c1",
                 "parameters": [
                     {
-                        "name": "school",
+                        "name": "course",
                         "in": "path",
-                        "description": "ID da escola",
+                        "description": "ID do curso",
                         "required": true,
                         "schema": {
                             "type": "string",
                             "format": "uuid"
                         }
-                    },
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de disciplinas do curso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Discipline"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/disciplines/levels/{level}/batch": {
+            "post": {
+                "tags": [
+                    "Discipline"
+                ],
+                "summary": "Associa múltiplas disciplinas a um nível",
+                "operationId": "5b3b415f14f1b681eae6bc04ba919688",
+                "parameters": [
                     {
                         "name": "level",
                         "in": "path",
@@ -941,13 +1071,20 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "discipline_id"
+                                    "discipline_ids"
                                 ],
                                 "properties": {
-                                    "discipline_id": {
-                                        "description": "ID da disciplina",
+                                    "discipline_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "uuid"
+                                        }
+                                    },
+                                    "course_id": {
                                         "type": "string",
-                                        "format": "uuid"
+                                        "format": "uuid",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -957,63 +1094,94 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Disciplina associada com sucesso",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Disciplina associada com sucesso!"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Disciplinas associadas com sucesso"
                     },
                     "422": {
-                        "description": "Erro de validação",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
+                        "description": "Erro de validação"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/disciplines/courses/{course}/batch": {
+            "post": {
+                "tags": [
+                    "Discipline"
+                ],
+                "summary": "Associa múltiplas disciplinas a um curso",
+                "operationId": "3e663f604ad67efa4e4ae1cc5cf98bce",
+                "parameters": [
+                    {
+                        "name": "course",
+                        "in": "path",
+                        "description": "ID do curso",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "discipline_ids",
+                                    "level_ids"
+                                ],
+                                "properties": {
+                                    "discipline_ids": {
+                                        "type": "array",
+                                        "items": {
                                             "type": "string",
-                                            "example": "O campo discipline_id é obrigatório."
+                                            "format": "uuid"
                                         }
                                     },
-                                    "type": "object"
-                                }
+                                    "level_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "uuid"
+                                        }
+                                    }
+                                },
+                                "type": "object"
                             }
                         }
                     }
-                }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Disciplinas associadas com sucesso"
+                    },
+                    "422": {
+                        "description": "Erro de validação"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             }
         },
-        "/disciplines/{discipline}/levels/{level}/": {
+        "/disciplines/levels/{level}/{discipline}": {
             "delete": {
                 "tags": [
                     "Discipline"
                 ],
                 "summary": "Remove uma disciplina de um nível",
-                "description": "Remove a associação de uma disciplina com um nível específico de uma escola.",
-                "operationId": "removeLevelDiscipline",
+                "operationId": "6e9edd006f320e6d348afd8bfa72aafa",
                 "parameters": [
-                    {
-                        "name": "school",
-                        "in": "path",
-                        "description": "ID da escola",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
-                    },
                     {
                         "name": "level",
                         "in": "path",
-                        "description": "ID do nível",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -1023,7 +1191,6 @@
                     {
                         "name": "discipline",
                         "in": "path",
-                        "description": "ID da disciplina",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -1033,117 +1200,30 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Disciplina removida com sucesso",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Disciplina removida com sucesso!"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/disciplines/courses/{course}": {
-            "post": {
-                "tags": [
-                    "Discipline"
-                ],
-                "summary": "Adiciona uma disciplina a um curso",
-                "description": "Associa uma disciplina a um curso específico de uma escola.",
-                "operationId": "addCourseDiscipline",
-                "parameters": [
-                    {
-                        "name": "school",
-                        "in": "path",
-                        "description": "ID da escola",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
+                        "description": "Disciplina removida com sucesso"
                     },
-                    {
-                        "name": "course",
-                        "in": "path",
-                        "description": "ID do curso",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "discipline_id"
-                                ],
-                                "properties": {
-                                    "discipline_id": {
-                                        "description": "ID da disciplina",
-                                        "type": "string",
-                                        "format": "uuid"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
+                    "404": {
+                        "description": "Registro não encontrado"
                     }
                 },
-                "responses": {
-                    "201": {
-                        "description": "Disciplina associada com sucesso",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Disciplina associada com sucesso!"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                "security": [
+                    {
+                        "sanctum": []
                     }
-                }
+                ]
             }
         },
-        "/disciplines/{discipline}/courses/{course}": {
+        "/disciplines/courses/{course}/{discipline}": {
             "delete": {
                 "tags": [
                     "Discipline"
                 ],
                 "summary": "Remove uma disciplina de um curso",
-                "description": "Remove a associação de uma disciplina com um curso específico de uma escola.",
-                "operationId": "removeCourseDiscipline",
+                "operationId": "fbd37217014372c223402ba376e96f17",
                 "parameters": [
-                    {
-                        "name": "school",
-                        "in": "path",
-                        "description": "ID da escola",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
-                    },
                     {
                         "name": "course",
                         "in": "path",
-                        "description": "ID do curso",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -1153,7 +1233,6 @@
                     {
                         "name": "discipline",
                         "in": "path",
-                        "description": "ID da disciplina",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -1163,22 +1242,17 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Disciplina removida com sucesso",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Disciplina removida com sucesso!"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Disciplina removida com sucesso"
+                    },
+                    "404": {
+                        "description": "Registro não encontrado"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             }
         },
         "/level": {
@@ -3400,6 +3474,79 @@
                 },
                 "type": "object"
             },
+            "Course": {
+                "title": "Course",
+                "description": "Modelo de Curso",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "category_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                },
+                "type": "object"
+            },
+            "Discipline": {
+                "title": "Discipline",
+                "properties": {
+                    "id": {
+                        "description": "ID único da disciplina",
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "description": "Nome da disciplina",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "Descrição da disciplina",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "workload": {
+                        "description": "Carga horária da disciplina",
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "description": "Data de criação",
+                        "type": "string",
+                        "format": "datetime"
+                    },
+                    "updated_at": {
+                        "description": "Data de atualização",
+                        "type": "string",
+                        "format": "datetime"
+                    },
+                    "deleted_at": {
+                        "description": "Data de exclusão",
+                        "type": "string",
+                        "format": "datetime",
+                        "nullable": true
+                    },
+                    "levels": {
+                        "description": "Níveis associados à disciplina",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Level"
+                        }
+                    },
+                    "courses": {
+                        "description": "Cursos associados à disciplina",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Course"
+                        }
+                    }
+                },
+                "type": "object"
+            },
             "Level": {
                 "required": [
                     "name",
@@ -3592,7 +3739,7 @@
         },
         {
             "name": "Discipline",
-            "description": "API Endpoints for Discipline"
+            "description": "API Endpoints para gerenciamento de disciplinas"
         },
         {
             "name": "Levels",

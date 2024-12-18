@@ -15,6 +15,7 @@ return new class extends Migration
             $table->foreignUuid('school_id')->constrained('schools')->cascadeOnDelete();
             $table->foreignUuid('level_id')->constrained('levels')->cascadeOnDelete();
             $table->foreignUuid('discipline_id')->constrained('disciplines')->cascadeOnDelete();
+            $table->foreignUuid('course_id')->nullable()->constrained('courses')->cascadeOnDelete();
             $table->timestamps();
             $table->softDeletes();
         });

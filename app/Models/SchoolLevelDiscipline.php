@@ -11,7 +11,7 @@ class SchoolLevelDiscipline extends Model
     use HasFactory, SoftDeletes;
 
     protected $table = "school_level_discipline";
-    protected $fillable = ['school_id', 'level_id', 'discipline_id'];
+    protected $fillable = ['school_id', 'level_id', 'discipline_id', 'course_id'];
 
     public function school()
     {
@@ -26,6 +26,11 @@ class SchoolLevelDiscipline extends Model
     public function discipline()
     {
         return $this->belongsTo(Discipline::class);
+    }
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class);
     }
 }
 

@@ -11,24 +11,35 @@ class Course extends Model
 {
     use HasFactory, HasUuids, SoftDeletes;
 
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'category_id'];
 
     protected $casts = [
         'id' => 'string',
     ];
 
-    public function school()
+    public function category()
     {
-        return $this->belongsTo(School::class, 'school_id', 'id');
-    }
-
-    public function classes()
-    {
-        return $this->hasMany(ClassModel::class, 'course_id');
+        return $this->belongsTo(Category::class);
     }
 
     public function disciplines()
     {
-        return $this->belongsToMany(Discipline::class, 'course_disciplines');
+        return $this->belongsToMany(Discipline::class, 'level_course_disciplines')
+            ->distinct();
+    }
+
+    public function schoolCourseDisciplines()
+    {
+        return $this->hasMany(SchoolCourseDiscipline::class);
+    }
+
+    public function schoolCourses()
+    {
+        return $this->hasMany(SchoolCourse::class);
+    }
+
+    public function levelCourseDisciplines()
+    {
+        return $this->hasMany(LevelCourseDiscipline::class);
     }
 }

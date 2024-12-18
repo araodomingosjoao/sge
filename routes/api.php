@@ -24,9 +24,11 @@ Route::get('/options', [SchoolController::class, 'options']);
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/setup/step/{step}', [SetupController::class, 'completeStep']);
     Route::get('/setup/status', [SetupController::class, 'checkSetupStatus']);
+    Route::get('/setup/steps', [SetupController::class, 'listSteps']);
+    Route::get('/setup/step/{step}/skip', [SetupController::class, 'skipStep']);
     Route::apiCrud('schools', SchoolController::class, null, [
         'create' => 'role:admin_school',
-        'delete' => 'role:admin_school' 
+        'delete' => 'role:admin_school'
     ]);
     Route::get('/user/profile', [AuthController::class, 'profile']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
@@ -35,20 +37,23 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::apiCrud('teacher', TeacherController::class);
     Route::get('/school/{id}', [SchoolController::class, 'read']);
     Route::post('/school/{id}', [SchoolController::class, 'update']);
-
-
-    Route::get('/disciplines', [DisciplineController::class, 'index']);
-    Route::get('/disciplines/levels/{level}', [DisciplineController::class, 'getLevelDisciplines']);
-    Route::post('/disciplines/levels/{level}', [DisciplineController::class, 'addLevelDiscipline']);
-    Route::delete('/disciplines/{discipline}/levels/{level}/', [DisciplineController::class, 'removeLevelDiscipline']);
-
+    Route::prefix('disciplines')->group(function () {
+        Route::get('/', [DisciplineController::class, 'index'])->name('disciplines.index');
+        Route::get('/all', [DisciplineController::class, 'all'])->name('disciplines.all');
+        Route::prefix('by-level')->group(function () {
+            Route::get('/{level}', [DisciplineController::class, 'getByLevel'])->name('disciplines.by-level');
+            Route::post('/{level}/batch', [DisciplineController::class, 'associateWithLevel'])->name('disciplines.level.associate-batch');
+            Route::delete('/{level}/{discipline}', [DisciplineController::class, 'dissociateFromLevel'])->name('disciplines.level.dissociate');
+        });
+        Route::prefix('by-course')->group(function () {
+            Route::get('/{course}', [DisciplineController::class, 'getByCourse'])->name('disciplines.by-course');
+            Route::post('/{course}/batch', [DisciplineController::class, 'associateWithCourse'])->name('disciplines.course.associate-batch');
+            Route::delete('/{course}/{discipline}', [DisciplineController::class, 'dissociateFromCourse'])->name('disciplines.course.dissociate');
+        });
+    });
     Route::get('/academic-years', [AcademicYearController::class, 'showAcademicYearWithTrimesters']);
     Route::put('/academic-years/{academicYear}/trimesters', [AcademicYearController::class, 'updateTrimesters']);
     Route::put('/academic-years/{academicYear}', [AcademicYearController::class, 'updateAcademicYear']);
-
-    Route::post('/disciplines/courses/{course}', [SchoolController::class, 'addCourseDiscipline']);
-    Route::delete('/disciplines/{discipline}/courses/{course}/disciplines', [SchoolController::class, 'removeCourseDiscipline']);
-    
     Route::apiCrud('class', ClassController::class);
     Route::apiCrud('classroom', ClassroomController::class);
     Route::apiCrud('allocations', AllocationController::class);
@@ -69,5 +74,4 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/students/{student_id}/transfer', [StudentController::class, 'transferStudent']);
     Route::delete('/students/{student_id}/enrollment/{enrollment_id}', [StudentController::class, 'cancelEnrollment']);
     Route::get('/students/class/{class_id}', [StudentController::class, 'getClassStudents']);
-
 });

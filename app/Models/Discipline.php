@@ -25,7 +25,7 @@ class Discipline extends BaseModel
 
     public function courses()
     {
-        return $this->belongsToMany(Course::class, 'course_discipline')
+        return $this->belongsToMany(Course::class, 'course_disciplines')
             ->withTimestamps();
     }
 

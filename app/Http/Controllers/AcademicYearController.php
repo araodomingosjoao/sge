@@ -21,13 +21,6 @@ class AcademicYearController extends Controller
      *     summary="List all academic years and their trimesters",
      *     tags={"Academic Year"},
      *     security={{ "sanctum": {} }},
-     *     @OA\Parameter(
-     *         name="school",
-     *         in="path",
-     *         description="ID of the school",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="List of academic years and their trimesters",
@@ -63,7 +56,7 @@ class AcademicYearController extends Controller
      *         in="path",
      *         description="ID of the academic year",
      *         required=true,
-     *         @OA\Schema(type="integer")
+     *         @OA\Schema(type="string")
      *     ),
      *     @OA\RequestBody(
      *         required=true,
@@ -74,7 +67,7 @@ class AcademicYearController extends Controller
      *                 type="array",
      *                 @OA\Items(
      *                     type="object",
-     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="id", type="string", example="9d8f8191-2362-468a-a362-c3c0b9f9efb5"),
      *                     @OA\Property(property="start_date", type="string", format="date", example="2024-01-01"),
      *                     @OA\Property(property="end_date", type="string", format="date", example="2024-04-30")
      *                 )
@@ -125,7 +118,7 @@ class AcademicYearController extends Controller
      *         in="path",
      *         description="ID of the academic year",
      *         required=true,
-     *         @OA\Schema(type="integer")
+     *         @OA\Schema(type="string")
      *     ),
      *     @OA\RequestBody(
      *         required=false,

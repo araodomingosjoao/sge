@@ -69,32 +69,6 @@ class School extends Model
         return $this->hasMany(AcademicYear::class, 'school_id');
     }
 
-    public function disciplines()
-    {
-        return $this->belongsToMany(Discipline::class, 'school_disciplines')
-                    ->withTimestamps()
-                    ->withSoftDeletes();
-    }
-
-    public function courses()
-    {
-        return $this->belongsToMany(Course::class, 'school_courses')
-                    ->withTimestamps()
-                    ->withSoftDeletes();
-    }
-
-    public function levels()
-    {
-        return $this->belongsToMany(Level::class, 'school_levels')
-                    ->withTimestamps()
-                    ->withSoftDeletes();
-    }
-
-    public function levelDisciplines()
-    {
-        return $this->hasMany(SchoolLevelDiscipline::class);
-    }
-
     public function courseDisciplines()
     {
         return $this->hasMany(SchoolCourseDiscipline::class);
@@ -118,5 +92,41 @@ class School extends Model
     public function trimesters()
     {
         return $this->hasMany(Trimester::class);
+    }
+
+    public function courses()
+    {
+        return $this->hasMany(SchoolCourse::class);
+    }
+
+    public function levels()
+    {
+        return $this->hasMany(SchoolLevel::class);
+    }
+
+    public function disciplines()
+    {
+        return $this->hasMany(SchoolDiscipline::class);
+    }
+
+    public function levelDisciplines()
+    {
+        return $this->hasMany(SchoolLevelDiscipline::class);
+    }
+
+    public function getDisciplinesByLevel($levelId)
+    {
+        return $this->levelDisciplines()
+            ->where('level_id', $levelId)
+            ->with(['discipline', 'course'])
+            ->get();
+    }
+
+    public function getDisciplinesByCourse($courseId)
+    {
+        return $this->levelDisciplines()
+            ->where('course_id', $courseId)
+            ->with(['discipline', 'level'])
+            ->get();
     }
 }
