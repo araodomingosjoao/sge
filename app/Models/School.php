@@ -33,7 +33,7 @@ class School extends Model
     protected $casts = [
         'id' => 'string',
         'type_education_id' => 'integer',
-        'category_id' => 'integer',
+        'category_id' => 'string',
         'founded_year' => 'integer',
         'status' => 'integer',
     ];

@@ -77,7 +77,6 @@ const stepComponents = {
 }
 
 const {
-    isSubmitting,
     steps,
     currentStep,
     setupProgress,

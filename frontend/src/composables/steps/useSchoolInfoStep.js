@@ -9,9 +9,10 @@ export function useSchoolInfoStep() {
     const setupStore = useSetupStore();
 
     const formData = ref({
+        id: "",
         school_name: "",
-        type_education_id: "",
-        category_id: "",
+        type_education_id: null,
+        category_id: null,
         registration_number: "",
         founded_year: "",
         website: "",
@@ -36,67 +37,80 @@ export function useSchoolInfoStep() {
 
     const fetchOptions = async () => {
         try {
+            setupStore.setLoading(true)
             const { data } = await axios.get("/options");
             options.value = data.data;
         } catch (error) {
             console.error("Erro ao carregar opções:", error);
+        } finally {
+            setupStore.setLoading(false)
         }
     };
 
     const initializeFormData = () => {
-        const { user } = userStore;
-        if (user?.school) {
-            formData.value.school_name = user.school.school_name || "";
-            formData.value.type_education_id =
-                user.school.type_education_id || "";
-            formData.value.category_id = user.school.category_id || "";
-            formData.value.registration_number =
-                user.school.registration_number || "";
-            formData.value.founded_year = user.school.founded_year || "";
-            formData.value.website = user.school.website || "";
-            formData.value.school_phone = user.school.phone || "";
-            formData.value.school_email = user.school.email || "";
-            formData.value.first_name = user.first_name || "";
-            formData.value.last_name = user.last_name || "";
-            formData.value.email = user.email || "";
-            formData.value.phone = user.phone || "";
-            formData.value.state = user.school.state || "";
-            formData.value.city = user.school.city || "";
-            formData.value.address = user.school.address || "";
+        const { user } = userStore
+        if (!user?.school) return
 
-            if (formData.value.state) {
-                handleProvinceChange();
+        Object.entries(formData.value).forEach(([key, _]) => {
+            if (key in user.school) {
+                formData.value[key] = user.school[key] || ''
+            } else if (key in user) {
+                formData.value[key] = user[key] || ''
             }
-        }
-    };
+        })
+
+        if (formData.value.state) handleProvinceChange()
+    }
 
     const loadSavedData = async () => {
-        const savedData = await setupStore.getStepData('school_info')
-        if (savedData) {
-            formData.value = { ...formData.value, ...savedData }
-            if (formData.value.state) {
-                handleProvinceChange()
+        console.log('teste: ');
+        
+        try {
+            setupStore.setLoading(true)
+            const savedData = await setupStore.getStepData('school_info')
+            if (savedData) {
+                formData.value = { ...formData.value, ...savedData }
+                if (formData.value.state) {
+                    handleProvinceChange()
+                }
+            } else {
+                initializeFormData()
             }
-        } else {
-            initializeFormData()
+        } finally {
+            setupStore.setLoading(false)
         }
     };
 
     const handleSubmit = async () => {
         try {
+            setupStore.setLoading(true)
+            formData.value.state = provinces.value.find(province => province.id === parseInt(formData.value.state))?.name || ""
+            const { data } = await axios.post(`school/${formData.value.id}`, formData.value);
+            const user = data.data
+            userStore.setUser({user});
+            
             await setupStore.saveStepData("school_info", formData.value);
             await setupStore.moveToNextStep();
             return true;
         } catch (error) {
             console.error("Erro ao salvar:", error);
             return false;
+        } finally {
+            setupStore.setLoading(false)
         }
     };
 
-    onMounted(() => {
-        fetchOptions();
-        loadSavedData();
-    });
+    const initialize = async () => {
+        setupStore.setLoading(true);
+        try {
+            await Promise.all([
+                fetchOptions(),
+                loadSavedData()
+            ]);
+        } finally {
+            setupStore.setLoading(false);
+        }
+    };
 
     return {
         formData,
@@ -105,6 +119,6 @@ export function useSchoolInfoStep() {
         municipalities,
         handleProvinceChange,
         handleSubmit,
-        loadSavedData,
+        initialize
     };
 }

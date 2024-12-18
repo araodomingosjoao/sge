@@ -1,4 +1,3 @@
-// src/components/steps/SchoolInfoStep.vue
 <template>
     <BaseStep 
         title="Informações Básicas da Escola"
@@ -29,7 +28,7 @@
                     />
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-6" v-if="formData.type_education_id == '4'">
                     <AppFormSelect
                         id="category_id"
                         label="Categoria"
@@ -189,6 +188,7 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
 import { useSchoolInfoStep } from '@/composables/steps/useSchoolInfoStep'
 import BaseStep from '../SetupBaseStep.vue'
 import StepSection from '../SetupStepSection.vue'
@@ -202,6 +202,11 @@ const {
     provinces,
     municipalities,
     handleProvinceChange,
-    handleSubmit
+    handleSubmit,
+    initialize
 } = useSchoolInfoStep()
+
+onMounted(async () => {
+    await initialize() 
+})
 </script>

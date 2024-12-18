@@ -1,36 +1,34 @@
 <template>
     <div class="d-flex justify-content-between mt-4">
-        <!-- Botão Voltar -->
         <button 
+            v-if="!isFirstStep"
             class="btn btn-light" 
             @click="$emit('previous')"
-            v-if="!isFirstStep"
+            :disabled="setupStore.isLoading"
         >
             <i class="ri-arrow-left-line me-1"></i>
             Voltar
         </button>
-        <div v-else></div>
 
         <div class="ms-auto">
-            <!-- Botão Pular (se disponível) -->
             <button
                 v-if="canSkip"
                 class="btn btn-light me-2"
                 @click="$emit('skip')"
+                :disabled="setupStore.isLoading"
             >
                 Pular
                 <i class="ri-skip-forward-mini-line ms-1"></i>
             </button>
 
-            <!-- Botão Próximo/Finalizar -->
             <button 
                 class="btn"
-                :class="isLastStep ? 'btn-success' : 'btn-primary'"
-                @click="handleSave"
-                :disabled="isSubmitting"
+                :class="submitButtonClass"
+                @click="emit('save')"
+                :disabled="setupStore.isLoading"
             >
-                <span v-if="isSubmitting" class="spinner-border spinner-border-sm me-1"></span>
-                {{ isLastStep ? 'Finalizar Setup' : 'Próximo' }}
+                <span v-if="setupStore.isLoading" class="spinner-border spinner-border-sm me-1"></span>
+                {{ submitButtonText }}
                 <i v-if="!isLastStep" class="ri-arrow-right-line ms-1"></i>
             </button>
         </div>
@@ -38,39 +36,25 @@
 </template>
 
 <script setup>
-import { useSetupNavigation } from "@/composables/useSetupNavigation";
+import { computed } from 'vue'
+import { useSetupStore } from '@/stores/setupStore'
+
+const setupStore = useSetupStore()
 
 const props = defineProps({
-    isFirstStep: {
-        type: Boolean,
-        required: true
-    },
-    isLastStep: {
-        type: Boolean,
-        required: true
-    },
-    canSkip: {
-        type: Boolean,
-        default: false
-    },
-    isSubmitting: {
-        type: Boolean,
-        default: false
-    }
+    isFirstStep: Boolean,
+    isLastStep: Boolean,
+    canSkip: Boolean
 })
 
+const submitButtonClass = computed(() => ({
+    'btn-success': props.isLastStep,
+    'btn-primary': !props.isLastStep
+}))
+
+const submitButtonText = computed(() => 
+    props.isLastStep ? 'Finalizar Setup' : 'Próximo'
+)
+
 const emit = defineEmits(['save', 'previous'])
-
-const { isLoading, handleNext } = useSetupNavigation()
-
-const handleSave = async () => {
-    try {
-        const stepData = await emit('save')
-        if (stepData) {
-            await handleNext(stepData)
-        }
-    } catch (error) {
-        console.error('Erro ao salvar:', error)
-    }
-}
 </script>

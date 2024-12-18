@@ -17,35 +17,47 @@ export const useSetupStore = defineStore("setup", {
 
     getters: {
         currentStepData: (state) =>
-            state.steps.find((step) => step.key === state.currentStep) || null,
+            state.steps.find((step) => step.key === state.currentStep),
+        setupProgress: (state) => state.progress.progress_percentage,
+        getStepData: (state) => (stepKey) => state.stepsData[stepKey],
 
-        canSkipCurrentStep: (state) => state.currentStepData?.can_skip || false,
+        canSkipCurrentStep: (state) => {
+            const step = state.steps.find((s) => s.key === state.currentStep);
+            return step?.can_skip ?? false;
+        },
 
         isStepAvailable: (state) => (stepKey) => {
             const step = state.steps.find((s) => s.key === stepKey);
-            return step && !step.completed;
-        },
+            if (!step) return false;
 
-        setupProgress: (state) => state.progress.progress_percentage,
+            const currentIndex = state.steps.findIndex(
+                (s) => s.key === state.currentStep
+            );
+            const stepIndex = state.steps.findIndex((s) => s.key === stepKey);
 
-        getStepData: (state) => (stepKey) => {
-            return state.stepsData[stepKey] || null;
+            return stepIndex <= currentIndex + 1;
         },
     },
 
     actions: {
+        setLoading(status) {
+            this.isLoading = status;
+        },
+        updateProgress(progressData) {
+            this.progress = {
+                total_steps: progressData.total_steps,
+                completed_steps: progressData.completed_steps,
+                progress_percentage: progressData.progress_percentage,
+            };
+        },
+
         async checkSetupStatus() {
             try {
-                this.isLoading = true;
+                this.setLoading(true);
                 const { data } = await axios.get("/setup/status");
 
                 this.steps = data.progress.steps;
-                this.progress = {
-                    total_steps: data.progress.total_steps,
-                    completed_steps: data.progress.completed_steps,
-                    progress_percentage: data.progress.progress_percentage,
-                };
-
+                this.updateProgress(data.progress);
                 this.currentStep = data.progress.current_step || "school_info";
 
                 return data.setup_required;
@@ -54,30 +66,30 @@ export const useSetupStore = defineStore("setup", {
                     error.response?.data?.error || "Erro ao verificar status";
                 throw error;
             } finally {
-                this.isLoading = false;
+                this.setLoading(false);
             }
         },
-        async saveStepData(stepKey, data) {
-            try {
-                this.isLoading = true;
-                const response = await axios.post(`/setup/step/${stepKey}`, {
-                    data: data,
-                });
-                
-                this.stepsData[stepKey] = data;
-                this.steps = response.data.progress.steps;
-                this.progress = {
-                    total_steps: response.data.progress.total_steps,
-                    completed_steps: response.data.progress.completed_steps,
-                    progress_percentage: response.data.progress.progress_percentage,
-                };
 
-                return response.data;
+        async saveStepData(stepKey, stepData) {
+            if (!stepKey || !stepData) throw new Error("Dados inválidos");
+
+            try {
+                this.setLoading(true);
+                const { data } = await axios.post(`/setup/step/${stepKey}`, {
+                    data: stepData,
+                });
+
+                this.stepsData[stepKey] = stepData;
+                this.steps = data.progress.steps;
+                this.updateProgress(data.progress);
+
+                return data;
             } catch (error) {
-                console.error("Erro ao salvar dados do step:", error);
-                throw error;
+                throw new Error(
+                    error.response?.data?.error || "Erro ao salvar dados"
+                );
             } finally {
-                this.isLoading = false;
+                this.setLoading(false);
             }
         },
 
@@ -92,7 +104,7 @@ export const useSetupStore = defineStore("setup", {
 
         async skipStep(stepKey) {
             try {
-                this.isLoading = true;
+                this.setLoading(true);
                 const { data } = await axios.post(
                     `/setup/step/${stepKey}/skip`
                 );
@@ -115,7 +127,7 @@ export const useSetupStore = defineStore("setup", {
                     error.response?.data?.error || "Erro ao pular etapa";
                 throw error;
             } finally {
-                this.isLoading = false;
+                this.setLoading(false);
             }
         },
     },
