@@ -8,15 +8,13 @@
             <p class="text-muted">{{ description }}</p>
         </header>
 
-        <AppForm @event:submit="handleSubmit">
-            <slot></slot>
-        </AppForm>
+        <slot></slot>
     </div>
 </template>
 
 <script setup>
-import AppForm from '@/components/UI/AppForm.vue';
 import { useSetupStore } from '@/stores/setupStore'
+const setupStore = useSetupStore()
 
 defineProps({
     title: {
@@ -28,14 +26,6 @@ defineProps({
         required: true
     }
 })
-
-
-const setupStore = useSetupStore()
-const emit = defineEmits(['submit'])
-
-const handleSubmit = (data) => {
-    // emit('submit', data)
-}
 </script>
 
 <style scoped>
