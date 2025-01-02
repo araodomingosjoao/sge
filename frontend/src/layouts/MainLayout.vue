@@ -49,7 +49,7 @@ import Header from '../components/Layout/Header.vue';
 import Navbar from '../components/Layout/Navbar.vue';
 import Footer from '../components/Layout/Footer.vue';
 import Breadcrumb from '../components/Layout/Breadcrumb.vue';
-import NotificationModal from '../components/UI/NotificationModal.vue';
+import NotificationModal from '../components/UI/AppModal.vue';
 import BackToTopButton from '../components/UI/BackToTopButton.vue';
 import Preloader from '../components/UI/Preloader.vue';
 

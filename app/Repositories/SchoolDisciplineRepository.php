@@ -7,6 +7,8 @@ use App\Models\Course;
 use App\Models\Level;
 use App\Models\SchoolDiscipline;
 use App\Models\School;
+use App\Models\SchoolCourseDiscipline;
+use App\Models\SchoolLevelDiscipline;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -236,6 +238,49 @@ class SchoolDisciplineRepository extends BaseRepository
                 ]);
             }
         }
+    }
+    /**
+     * Dissocia uma disciplina de um nível específico
+     */
+    public function dissociateFromLevel(string $levelId, string $disciplineId): bool
+    {
+        \Log::info("Removendo disciplina do nível:", [
+            'level_id' => $levelId,
+            'discipline_id' => $disciplineId,
+            'school_id' => Auth::user()->school_id
+        ]);
+
+        return SchoolLevelDiscipline::where([
+            'school_id' => Auth::user()->school_id,
+            'level_id' => $levelId,
+            'discipline_id' => $disciplineId
+        ])->delete();
+    }
+
+    /**
+     * Dissocia uma disciplina de um curso específico
+     */
+    public function dissociateFromCourse(string $courseId, string $disciplineId): bool
+    {
+        \Log::info("Removendo disciplina do curso:", [
+            'course_id' => $courseId,
+            'discipline_id' => $disciplineId,
+            'school_id' => Auth::user()->school_id
+        ]);
+
+        // Remove da tabela school_course_disciplines
+        SchoolCourseDiscipline::where([
+            'school_id' => Auth::user()->school_id,
+            'course_id' => $courseId,
+            'discipline_id' => $disciplineId
+        ])->delete();
+
+        // Remove também das associações com níveis relacionadas ao curso
+        return SchoolLevelDiscipline::where([
+            'school_id' => Auth::user()->school_id,
+            'course_id' => $courseId,
+            'discipline_id' => $disciplineId
+        ])->delete();
     }
 
     private function formatFundamentalStructure(Collection $disciplines): array

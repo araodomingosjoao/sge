@@ -71,6 +71,12 @@ const stepComponents = {
     academic_periods: defineAsyncComponent(() => 
         import("../../components/steps/AcademicPeriodsStep.vue")
     ),
+    courses: defineAsyncComponent(() => 
+        import("../../components/steps/CoursesStep.vue")
+    ),
+    subjects: defineAsyncComponent(() => 
+        import("../../components/steps/SubjectsStep.vue")
+    ),
     // 'academic_periods': () => import("@/components/steps/AcademicPeriodsStep.vue"),
     // 'subjects': () => import("@/components/steps/SubjectsStep.vue"),
     // 'classes': () => import("@/components/steps/ClassesStep.vue"),

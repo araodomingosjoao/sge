@@ -7,6 +7,8 @@ import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import router from './router';
 import App from './App.vue'
 import './config/vee-validate';
+import { createNotivue } from 'notivue'
+import 'notivue/notifications.css'
 
 const app = createApp(App)
 const pinia = createPinia();
@@ -19,6 +21,8 @@ window.addEventListener("load", () => {
         preloader.style.visibility = "hidden";
     }
 });
+
+app.use(createNotivue())
 
 app.use(pinia)
 app.use(router)
